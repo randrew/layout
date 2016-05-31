@@ -42,9 +42,13 @@ https://github.com/bkaradzic/bx/raw/master/tools/bin/windows/genie.exe
 Visual Studio 2015
 ------------------
 
-> genie.exe vs2015
+```
+genie.exe vs2015
+```
 
 MinGW
 -----
 
-> ./genie.exe gmake && mingw32-make.exe -C build/gmake tests config=release64
+```
+./genie.exe gmake && mingw32-make.exe -C build/gmake tests config=release64
+```
