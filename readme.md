@@ -13,13 +13,12 @@ Building is handled by [GENie](https://github.com/bkaradzic/GENie), but no
 executable binaries are included in this source repository. You will need to
 download (or build yourself) a GENie executable and place it in your path or at
 the root of this repository tree. If you want to build on a platform other than
-Windows, platform, you'll likely need to modify genie.lua to add compatibility
-for that platform.
+Windows, you'll likely need to modify genie.lua for compatibility.
 
-However, if you want to use Layout in your own project, you can probably just
-copy layout.h and layout.c into your project's source tree. You don't
-necessarily have to build it as a shared library and link against it. There are
-no external dependencies.
+However, if you want to use Layout in your own project, you can probably copy
+layout.h and layout.c into your project's source tree and use your own build
+system. You don't necessarily have to build *Layout* as a shared library and
+link against it. There are no external dependencies.
 
 *Layout* is based on the nice library
 [oui](https://bitbucket.org/duangle/oui-blendish) by duangle. Unlike *oui*,
