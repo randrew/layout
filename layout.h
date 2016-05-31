@@ -37,18 +37,18 @@ typedef int16_t lay_vec2 __attribute__ ((__vector_size__ (4), aligned(4)));
 #endif // LAY_FLOAT
 #elif defined(_MSC_VER)
 struct lay_vec4 {
-	lay_scalar xyzw[4];
-	const lay_scalar& operator[](int index) const
-	{ return xyzw[index]; }
-	lay_scalar& operator[](int index)
-	{ return xyzw[index]; }
+    lay_scalar xyzw[4];
+    const lay_scalar& operator[](int index) const
+    { return xyzw[index]; }
+    lay_scalar& operator[](int index)
+    { return xyzw[index]; }
 };
 struct lay_vec2 {
-	lay_scalar xy[2];
-	const lay_scalar& operator[](int index) const
-	{ return xy[index]; }
-	lay_scalar& operator[](int index)
-	{ return xy[index]; }
+    lay_scalar xy[2];
+    const lay_scalar& operator[](int index) const
+    { return xy[index]; }
+    lay_scalar& operator[](int index)
+    { return xy[index]; }
 };
 #endif // __GNUC__ or _MSC_VER
 
@@ -175,7 +175,7 @@ enum {
     // bit 5-9
     LAY_ITEM_LAYOUT_MASK = 0x0003E0,
     // item has been inserted (bit 10)
-    LAY_ITEM_INSERTED	= 0x400,
+    LAY_ITEM_INSERTED   = 0x400,
     // horizontal size has been explicitly set (bit 11)
     LAY_ITEM_HFIXED      = 0x800,
     // vertical size has been explicitly set (bit 12)
@@ -246,7 +246,7 @@ LAY_STATIC_INLINE lay_id lay_next_sibling(const lay_context *ctx, lay_id id)
 LAY_STATIC_INLINE lay_vec4 lay_rect_get(const lay_context *ctx, lay_id id)
 {
     LAY_ASSERT(id != LAY_ID_INVALID && id < ctx->count);
-	return ctx->rects[id];
+    return ctx->rects[id];
 }
 
 #undef LAY_EXPORT

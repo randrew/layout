@@ -72,8 +72,8 @@ void lay_context_run(lay_context *ctx)
     // Maybe we should instead have a separate 'reset_breaks' procedure the
     // user can explicitly run when they know they have 'wrap' items which are
     // being resued across frames.
-	//
-	// Alternatively, we could use a flag bit to indicate whether an item's
+    //
+    // Alternatively, we could use a flag bit to indicate whether an item's
     // children have already been wrapped and may need re-wrapping.
     for (lay_id i = 0; i < ctx->count; ++i) {
         lay_item_t *pitem = lay_item_get(ctx, i);
@@ -493,7 +493,7 @@ void lay_arrange_stacked(
         // it, so I'll leave it if-def'd for now.
         else if (!wrap && (squeezed_count > 0))
 #else
-		// This is the original oui code
+        // This is the original oui code
         else if (!wrap && (extra_space < 0))
 #endif
             eater = (float)extra_space / (float)squeezed_count;

@@ -72,7 +72,7 @@ int sprint_item_info(char* str, lay_context *ctx, lay_id item)
 
 LTEST_DECLARE(testing_sanity)
 {
-	// MSVC (rightly) warns us that these are constant expressions which are
+    // MSVC (rightly) warns us that these are constant expressions which are
     // always or never true.
 #ifndef _MSC_VER
     LTEST_TRUE(1);
@@ -94,7 +94,7 @@ LTEST_DECLARE(testing_sanity)
     LTEST_VEC4UNEQ(v1, 55, 57, 58, 59);
     LTEST_VEC4UNEQ(v1, 55, 57, 58, 59);
 
-	LTEST_TRUE(ctx != NULL);
+    LTEST_TRUE(ctx != NULL);
 }
 
 LTEST_DECLARE(simple_fill)
@@ -906,5 +906,5 @@ int main()
 
     lay_context_destroy(&ctx);
     free(sbuf);
-	return 0;
+    return 0;
 }

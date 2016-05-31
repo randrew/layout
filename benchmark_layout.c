@@ -295,5 +295,5 @@ int main()
 
     lay_context_destroy(&ctx);
     free(sbuf);
-	return 0;
+    return 0;
 }
