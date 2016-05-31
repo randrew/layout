@@ -169,11 +169,3 @@ solution "layout"
         incl_luajit()
         configuration {}
             targetname("layout")
-
--- Copy glew32.dll file when creating gmake project files
--- Only needed if we have any projects using glew
---
---if _ACTION == "gmake" then
---    os.mkdir(targetDir)
---    os.copyfile("./thirdparty/glew/bin/mingw/glew32.dll", path.join(targetDir, "glew32.dll"))
---end
