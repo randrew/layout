@@ -9,15 +9,17 @@ changes.
 It comes with a small set of tests as a build target, along with a primitive
 benchmark and example usage of the library as a Lua .dll module.
 
-Building is handled by [GENie](https://github.com/bkaradzic/GENie), but only a
-Windows binary is included in this repository. If you want to build on another
-platform, you'll need to get GENie for that platform, and you'll also likely
-need to modify genie.lua.
+Building is handled by [GENie](https://github.com/bkaradzic/GENie), but no
+executable binaries are included in this source repository. You will need to
+download (or build yourself) a GENie executable and place it in your path or at
+the root of this repository tree. If you want to build on a platform other than
+Windows, platform, you'll likely need to modify genie.lua to add compatibility
+for that platform.
 
-If you're using this code in your own project, you can probably just copy
-layout.h and layout.c into your project tree. You don't necessarily have to
-build it as a shared library and include it that way. There are no external
-dependencies.
+However, if you want to use Layout in your own project, you can probably just
+copy layout.h and layout.c into your project's source tree. You don't
+necessarily have to build it as a shared library and link against it. There are
+no external dependencies.
 
 *Layout* is based on the nice library
 [oui](https://bitbucket.org/duangle/oui-blendish) by duangle. Unlike *oui*,
@@ -25,6 +27,18 @@ dependencies.
 
 Building
 ========
+
+You will first need to get (or make) a GENie binary and place it in your path
+or at the root of this repository.
+
+Linux:  
+https://github.com/bkaradzic/bx/raw/master/tools/bin/linux/genie
+
+OSX:  
+https://github.com/bkaradzic/bx/raw/master/tools/bin/darwin/genie
+
+Windows:  
+https://github.com/bkaradzic/bx/raw/master/tools/bin/windows/genie.exe
 
 Visual Studio 2015
 ------------------
