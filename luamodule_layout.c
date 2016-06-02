@@ -41,6 +41,15 @@ lay_id lualay_id_check(lua_State *L, lay_context *ctx, int pos)
     return (lay_id)n;
 }
 
+lay_id lualay_id_check_notinserted(lua_State* L, lay_context *ctx, int pos)
+{
+    lay_id id = lualay_id_check(L, ctx, pos);
+    const lay_item_t* pitem = lay_item_get(ctx, id);
+    uint32_t inserted = pitem->flags & LAY_ITEM_INSERTED;
+    luaL_argcheck(L, !inserted, pos, "Item has already been inserted");
+    return id;
+}
+
 int lualay_context_gc(lua_State* L)
 {
     lay_context* ctx = lualay_context_check(L);
@@ -94,7 +103,7 @@ int lualay_item_insert(lua_State* L)
 {
     lay_context *ctx = lualay_context_check(L);
     lay_id parent = lualay_id_check(L, ctx, 2);
-    lay_id child = lualay_id_check(L, ctx, 3);
+    lay_id child = lualay_id_check_notinserted(L, ctx, 3);
     lay_insert(ctx, parent, child);
     return 0;
 }
@@ -103,7 +112,7 @@ int lualay_item_append(lua_State* L)
 {
     lay_context *ctx = lualay_context_check(L);
     lay_id earlier = lualay_id_check(L, ctx, 2);
-    lay_id later = lualay_id_check(L, ctx, 3);
+    lay_id later = lualay_id_check_notinserted(L, ctx, 3);
     lay_append(ctx, earlier, later);
     return 0;
 }
@@ -112,7 +121,7 @@ int lualay_item_push(lua_State* L)
 {
     lay_context *ctx = lualay_context_check(L);
     lay_id parent = lualay_id_check(L, ctx, 2);
-    lay_id child = lualay_id_check(L, ctx, 3);
+    lay_id child = lualay_id_check_notinserted(L, ctx, 3);
     lay_push(ctx, parent, child);
     return 0;
 }
