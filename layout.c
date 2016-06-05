@@ -3,7 +3,7 @@
 #include <string.h> // memset
 #include <stdlib.h> // realloc
 
-#if defined(__GNUC__)
+#if defined(__GNUC__) || defined(__clang__)
 #define LAY_FORCE_INLINE __attribute__((always_inline)) inline
 #define LAY_RESTRICT restrict
 #elif defined(_MSC_VER)

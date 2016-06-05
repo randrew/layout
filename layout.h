@@ -10,7 +10,7 @@
 
 // 'static inline' for things we always want inlined -- the compiler should not
 // even have to consider not inlining these.
-#if defined(__GNUC__)
+#if defined(__GNUC__) || defined(__clang__)
 #define LAY_STATIC_INLINE __attribute__((always_inline)) static inline
 #elif defined(_MSC_VER)
 #define LAY_STATIC_INLINE __forceinline static
@@ -27,7 +27,7 @@ typedef float lay_scalar;
 typedef int16_t lay_scalar;
 #endif
 
-#if defined(__GNUC__)
+#if defined(__GNUC__) || defined(__clang__)
 #if LAY_FLOAT == 1
 typedef float lay_vec4 __attribute__ ((__vector_size__ (16), aligned(16)));
 typedef float lay_vec2 __attribute__ ((__vector_size__ (8), aligned(8)));
@@ -62,7 +62,7 @@ typedef struct lay_item_t {
     lay_id next_sibling;
     lay_vec4 margins;
     lay_vec2 size;
-#if defined(__GNUC__)
+#if defined(__GNUC__) || defined(__clang__)
 } __attribute__ ((aligned (16))) lay_item_t;
 #else
 } lay_item_t;
@@ -159,10 +159,13 @@ enum {
     //
     // (In reality we have more free bits than this, see what gets used in the
     // masks)
-    LAY_USERMASK = 0xffff0000,
+    //
+    // TODO fix int/unsigned size mismatch (clang issues warning for this),
+    // should be all bits as 1 instead of INT_MAX
+    LAY_USERMASK = 0x7fff0000,
 
     // a special mask passed to uiFindItem()
-    LAY_ANY = 0xffffffff,
+    LAY_ANY = 0x7fffffff,
 };
 
 enum {
@@ -191,7 +194,7 @@ enum {
 
 LAY_STATIC_INLINE lay_vec4 lay_vec4_xyzw(lay_scalar x, lay_scalar y, lay_scalar z, lay_scalar w)
 {
-#if defined(__GNUC__)
+#if defined(__GNUC__) || defined(__clang__)
     return (lay_vec4){x, y, z, w};
 #elif defined(_MSC_VER)
     lay_vec4 result;
