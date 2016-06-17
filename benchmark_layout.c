@@ -49,10 +49,10 @@ int sprint_vec2(char* str, lay_vec2 v)
 int sprint_item_info(char* str, lay_context *ctx, lay_id item)
 {
     int offs = 0;
-    lay_vec4 item_rect = lay_rect_get(ctx, item);
+    lay_vec4 item_rect = lay_get_rect(ctx, item);
 
-    lay_vec4 item_margins = lay_margins_get(ctx, item);
-    lay_vec2 item_size = lay_size_get(ctx, item);
+    lay_vec4 item_margins = lay_get_margins(ctx, item);
+    lay_vec2 item_size = lay_get_size(ctx, item);
 
     offs += sprintf(str + offs, "rect: ");
     offs += sprint_vec4(str + offs, item_rect);
@@ -99,60 +99,60 @@ static inline void benchmark_nested(lay_context *ctx, char *strbuf)
     // main_child is a column that contains rows, and those rows
     // will contain columns.
     lay_id main_child = lay_item(ctx);
-    lay_size_set_xy(ctx, root,
+    lay_set_size_xy(ctx, root,
         70,
         // 10 units extra size above and below for main_child
         // margin
         (num_rows_with_height * 10 + 2 * 10)
     );
-    lay_margins_set_ltrb(ctx, main_child, 10, 10, 10, 10);
-    lay_contain_set(ctx, main_child, LAY_COLUMN);
+    lay_set_margins_ltrb(ctx, main_child, 10, 10, 10, 10);
+    lay_set_contain(ctx, main_child, LAY_COLUMN);
     lay_insert(ctx, root, main_child);
-    lay_behave_set(ctx, main_child, LAY_FILL);
+    lay_set_behave(ctx, main_child, LAY_FILL);
 
     lay_id *rows = (lay_id*)calloc(num_rows, sizeof(lay_id));
 
     // auto-filling columns-in-row, each one should end up being
     // 10 units wide
     rows[0] = lay_item(ctx);
-    lay_contain_set(ctx, rows[0], LAY_ROW);
-    lay_behave_set(ctx, rows[0], LAY_FILL);
+    lay_set_contain(ctx, rows[0], LAY_ROW);
+    lay_set_behave(ctx, rows[0], LAY_FILL);
     lay_id cols1[5];
     // hmm so both the row and its child columns need to be set to
     // fill? which means main_child also needs to be set to fill?
     for (size_t i = 0; i < 5; ++i) {
         lay_id col = lay_item(ctx);
         // fill empty space
-        lay_behave_set(ctx, col, LAY_FILL);
+        lay_set_behave(ctx, col, LAY_FILL);
         lay_insert(ctx, rows[0], col);
         cols1[i] = col;
     }
 
     rows[1] = lay_item(ctx);
-    lay_contain_set(ctx, rows[1], LAY_ROW);
-    lay_behave_set(ctx, rows[1], LAY_VFILL);
+    lay_set_contain(ctx, rows[1], LAY_ROW);
+    lay_set_behave(ctx, rows[1], LAY_VFILL);
     lay_id cols2[5];
     for (size_t i = 0; i < 5; ++i) {
         lay_id col = lay_item(ctx);
         // fixed-size horizontally, fill vertically
-        lay_size_set_xy(ctx, col, 10, 0);
-        lay_behave_set(ctx, col, LAY_VFILL);
+        lay_set_size_xy(ctx, col, 10, 0);
+        lay_set_behave(ctx, col, LAY_VFILL);
         lay_insert(ctx, rows[1], col);
         cols2[i] = col;
     }
 
     // these columns have an inner item which sizes them
     rows[2] = lay_item(ctx);
-    lay_contain_set(ctx, rows[2], LAY_ROW);
+    lay_set_contain(ctx, rows[2], LAY_ROW);
     lay_id cols3[2];
     for (size_t i = 0; i < 2; ++i) {
         lay_id col = lay_item(ctx);
         lay_id inner_sizer = lay_item(ctx);
         // only the second one will have height
-        lay_size_set_xy(ctx, inner_sizer, 25, 10 * (lay_scalar)i);
+        lay_set_size_xy(ctx, inner_sizer, 25, 10 * (lay_scalar)i);
         // align to bottom, only should make a difference for
         // first item
-        lay_behave_set(ctx, col, LAY_BOTTOM);
+        lay_set_behave(ctx, col, LAY_BOTTOM);
         lay_insert(ctx, col, inner_sizer);
         lay_insert(ctx, rows[2], col);
         cols3[i] = col;
@@ -160,8 +160,8 @@ static inline void benchmark_nested(lay_context *ctx, char *strbuf)
 
     // row 4 should end up being 0 units tall after layout
     rows[3] = lay_item(ctx);
-    lay_contain_set(ctx, rows[3], LAY_ROW);
-    lay_behave_set(ctx, rows[3], LAY_HFILL);
+    lay_set_contain(ctx, rows[3], LAY_ROW);
+    lay_set_behave(ctx, rows[3], LAY_HFILL);
     lay_id cols4[99];
     for (size_t i = 0; i < 99; ++i) {
         lay_id col = lay_item(ctx);
@@ -172,12 +172,12 @@ static inline void benchmark_nested(lay_context *ctx, char *strbuf)
     // row 5 should be 10 pixels tall after layout, and each of
     // its columns should be 1 pixel wide
     rows[4] = lay_item(ctx);
-    lay_contain_set(ctx, rows[4], LAY_ROW);
-    lay_behave_set(ctx, rows[4], LAY_FILL);
+    lay_set_contain(ctx, rows[4], LAY_ROW);
+    lay_set_behave(ctx, rows[4], LAY_FILL);
     lay_id cols5[50];
     for (size_t i = 0; i < 50; ++i) {
         lay_id col = lay_item(ctx);
-        lay_behave_set(ctx, col, LAY_FILL);
+        lay_set_behave(ctx, col, LAY_FILL);
         lay_insert(ctx, rows[4], col);
         cols5[i] = col;
     }
@@ -197,19 +197,19 @@ static inline void benchmark_nested(lay_context *ctx, char *strbuf)
     // choice for testing multiple runs of the same context.
     for (uint32_t run_n = 0; run_n < 5; ++run_n) {
         //printf("    Iteration #%d\n", run_n + 1);
-        lay_context_run(ctx);
+        lay_run_context(ctx);
 
-        LTEST_VEC4EQ(lay_rect_get(ctx, main_child), 10, 10, 50, 40);
+        LTEST_VEC4EQ(lay_get_rect(ctx, main_child), 10, 10, 50, 40);
         // These rows should all be 10 units in height
-        LTEST_VEC4EQ(lay_rect_get(ctx, rows[0]), 10, 10, 50, 10);
-        LTEST_VEC4EQ(lay_rect_get(ctx, rows[1]), 10, 20, 50, 10);
-        LTEST_VEC4EQ(lay_rect_get(ctx, rows[2]), 10, 30, 50, 10);
+        LTEST_VEC4EQ(lay_get_rect(ctx, rows[0]), 10, 10, 50, 10);
+        LTEST_VEC4EQ(lay_get_rect(ctx, rows[1]), 10, 20, 50, 10);
+        LTEST_VEC4EQ(lay_get_rect(ctx, rows[2]), 10, 30, 50, 10);
         // this row should have 0 height
-        LTEST_VEC4EQ(lay_rect_get(ctx, rows[3]), 10, 40, 50,  0);
-        LTEST_VEC4EQ(lay_rect_get(ctx, rows[4]), 10, 40, 50, 10);
+        LTEST_VEC4EQ(lay_get_rect(ctx, rows[3]), 10, 40, 50,  0);
+        LTEST_VEC4EQ(lay_get_rect(ctx, rows[4]), 10, 40, 50, 10);
 
         for (int16_t i = 0; i < 5; ++i) {
-            lay_vec4 r = lay_rect_get(ctx, cols1[i]);
+            lay_vec4 r = lay_get_rect(ctx, cols1[i]);
             // each of these should be 10 units wide, and stacked
             // horizontally
             LTEST_VEC4EQ(r, 10 + 10 * i, 10, 10, 10);
@@ -217,27 +217,27 @@ static inline void benchmark_nested(lay_context *ctx, char *strbuf)
 
         // the cols in the second row are similar to first row
         for (int16_t i = 0; i < 5; ++i) {
-            lay_vec4 r = lay_rect_get(ctx, cols2[i]);
+            lay_vec4 r = lay_get_rect(ctx, cols2[i]);
             LTEST_VEC4EQ(r, 10 + 10 * i, 20, 10, 10);
         }
 
         // leftmost (first of two items), aligned to bottom of row, 0
         // units tall
-        LTEST_VEC4EQ(lay_rect_get(ctx, cols3[0]), 10, 40, 25, 0);
+        LTEST_VEC4EQ(lay_get_rect(ctx, cols3[0]), 10, 40, 25, 0);
         // rightmost (second of two items), same height as row, which
         // is 10 units tall
-        LTEST_VEC4EQ(lay_rect_get(ctx, cols3[1]), 35, 30, 25, 10);
+        LTEST_VEC4EQ(lay_get_rect(ctx, cols3[1]), 35, 30, 25, 10);
 
         // these should all have size 0 and be in the middle of the
         // row
         for (int16_t i = 0; i < 99; ++i) {
-            lay_vec4 r = lay_rect_get(ctx, cols4[i]);
+            lay_vec4 r = lay_get_rect(ctx, cols4[i]);
             LTEST_VEC4EQ(r, 25 + 10, 40, 0, 0);
         }
 
         // these should all be 1 unit wide and 10 units tall
         for (int16_t i = 0; i < 50; ++i) {
-            lay_vec4 r = lay_rect_get(ctx, cols5[i]);
+            lay_vec4 r = lay_get_rect(ctx, cols5[i]);
             LTEST_VEC4EQ(r, 10 + i, 40, 1, 10);
         }
     }
@@ -250,7 +250,7 @@ static inline void benchmark_nested(lay_context *ctx, char *strbuf)
 // Resets string buffer and lay context before running test
 #define LBENCH_RUN(testname) \
     memset(sbuf, 0, 4096); \
-    lay_context_reset(&ctx); \
+    lay_reset_context(&ctx); \
     printf(" * " #testname "\n"); \
     testname(&ctx, sbuf);
 
@@ -264,7 +264,7 @@ int main()
     char *sbuf = (char*)malloc(4096);
 
     lay_context ctx;
-    lay_context_init(&ctx);
+    lay_init_context(&ctx);
 
     double freq = get_perf_freq();
     memset(sbuf, 0, 4096);
@@ -276,7 +276,7 @@ int main()
     const uint32_t num_runs = 100000;
     int64_t *run_times = (int64_t*)calloc(num_runs, sizeof(int64_t));
     for (uint32_t run_n = 0; run_n < num_runs; ++run_n) {
-        lay_context_reset(&ctx);
+        lay_reset_context(&ctx);
         int64_t t1 = perf_counter();
         //printf(" * " #testname "\n");
         benchmark_nested(&ctx, sbuf);
@@ -293,7 +293,7 @@ int main()
 
     free(run_times);
 
-    lay_context_destroy(&ctx);
+    lay_destroy_context(&ctx);
     free(sbuf);
     return 0;
 }

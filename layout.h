@@ -52,8 +52,8 @@ struct lay_vec2 {
 };
 #endif // __GNUC__ or _MSC_VER
 
-#ifndef LAY_ID_INVALID
-#define LAY_ID_INVALID UINT32_MAX
+#ifndef LAY_INVALID_ID
+#define LAY_INVALID_ID UINT32_MAX
 #endif
 
 typedef struct lay_item_t {
@@ -206,49 +206,49 @@ LAY_STATIC_INLINE lay_vec4 lay_vec4_xyzw(lay_scalar x, lay_scalar y, lay_scalar 
 #endif
 }
 
-LAY_EXPORT void lay_context_init(lay_context *ctx);
-LAY_EXPORT void lay_context_reserve(lay_context *ctx, lay_id count);
-LAY_EXPORT void lay_context_destroy(lay_context *ctx);
+LAY_EXPORT void lay_init_context(lay_context *ctx);
+LAY_EXPORT void lay_reserve_items_capacity(lay_context *ctx, lay_id count);
+LAY_EXPORT void lay_destroy_context(lay_context *ctx);
 
-LAY_EXPORT void lay_context_reset(lay_context *ctx);
-LAY_EXPORT void lay_context_run(lay_context *ctx);
+LAY_EXPORT void lay_reset_context(lay_context *ctx);
+LAY_EXPORT void lay_run_context(lay_context *ctx);
 
-LAY_EXPORT lay_id lay_context_item_count(lay_context *ctx);
-LAY_EXPORT lay_id lay_context_item_capacity(lay_context *ctx);
+LAY_EXPORT lay_id lay_items_count(lay_context *ctx);
+LAY_EXPORT lay_id lay_items_capacity(lay_context *ctx);
 
 LAY_EXPORT lay_id lay_item(lay_context *ctx);
 LAY_EXPORT void lay_append(lay_context *ctx, lay_id earlier, lay_id later);
 LAY_EXPORT void lay_insert(lay_context *ctx, lay_id parent, lay_id child);
 LAY_EXPORT void lay_push(lay_context *ctx, lay_id parent, lay_id child);
-LAY_EXPORT lay_vec2 lay_size_get(lay_context *ctx, lay_id item);
-LAY_EXPORT void lay_size_set_xy(lay_context *ctx, lay_id item, lay_scalar width, lay_scalar height);
-LAY_EXPORT void lay_contain_set(lay_context *ctx, lay_id item, uint32_t flags);
-LAY_EXPORT void lay_behave_set(lay_context *ctx, lay_id item, uint32_t flags);
-LAY_EXPORT lay_vec4 lay_margins_get(lay_context *ctx, lay_id item);
-LAY_EXPORT void lay_margins_set(lay_context *ctx, lay_id item, lay_vec4 ltrb);
-LAY_EXPORT void lay_margins_set_ltrb(lay_context *ctx, lay_id item, lay_scalar l, lay_scalar t, lay_scalar r, lay_scalar b);
+LAY_EXPORT lay_vec2 lay_get_size(lay_context *ctx, lay_id item);
+LAY_EXPORT void lay_set_size_xy(lay_context *ctx, lay_id item, lay_scalar width, lay_scalar height);
+LAY_EXPORT void lay_set_contain(lay_context *ctx, lay_id item, uint32_t flags);
+LAY_EXPORT void lay_set_behave(lay_context *ctx, lay_id item, uint32_t flags);
+LAY_EXPORT lay_vec4 lay_get_margins(lay_context *ctx, lay_id item);
+LAY_EXPORT void lay_set_margins(lay_context *ctx, lay_id item, lay_vec4 ltrb);
+LAY_EXPORT void lay_set_margins_ltrb(lay_context *ctx, lay_id item, lay_scalar l, lay_scalar t, lay_scalar r, lay_scalar b);
 
-LAY_STATIC_INLINE lay_item_t *lay_item_get(const lay_context *ctx, lay_id id)
+LAY_STATIC_INLINE lay_item_t *lay_get_item(const lay_context *ctx, lay_id id)
 {
-    LAY_ASSERT(id != LAY_ID_INVALID && id < ctx->count);
+    LAY_ASSERT(id != LAY_INVALID_ID && id < ctx->count);
     return ctx->items + id;
 }
 
 LAY_STATIC_INLINE lay_id lay_first_child(const lay_context *ctx, lay_id id)
 {
-    const lay_item_t *pitem = lay_item_get(ctx, id);
+    const lay_item_t *pitem = lay_get_item(ctx, id);
     return pitem->first_child;
 }
 
 LAY_STATIC_INLINE lay_id lay_next_sibling(const lay_context *ctx, lay_id id)
 {
-    const lay_item_t *pitem = lay_item_get(ctx, id);
+    const lay_item_t *pitem = lay_get_item(ctx, id);
     return pitem->next_sibling;
 }
 
-LAY_STATIC_INLINE lay_vec4 lay_rect_get(const lay_context *ctx, lay_id id)
+LAY_STATIC_INLINE lay_vec4 lay_get_rect(const lay_context *ctx, lay_id id)
 {
-    LAY_ASSERT(id != LAY_ID_INVALID && id < ctx->count);
+    LAY_ASSERT(id != LAY_INVALID_ID && id < ctx->count);
     return ctx->rects[id];
 }
 

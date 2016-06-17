@@ -19,7 +19,7 @@ int lualay_context_new(lua_State* L)
 {
     lua_settop(L, 0);
     lay_context *ctx = (lay_context*)lua_newuserdata(L, sizeof(lay_context));
-    lay_context_init(ctx);
+    lay_init_context(ctx);
 
     luaL_getmetatable(L, "Layout");
     lua_setmetatable(L, -2);
@@ -44,7 +44,7 @@ lay_id lualay_id_check(lua_State *L, lay_context *ctx, int pos)
 lay_id lualay_id_check_notinserted(lua_State* L, lay_context *ctx, int pos)
 {
     lay_id id = lualay_id_check(L, ctx, pos);
-    const lay_item_t* pitem = lay_item_get(ctx, id);
+    const lay_item_t* pitem = lay_get_item(ctx, id);
     uint32_t inserted = pitem->flags & LAY_ITEM_INSERTED;
     luaL_argcheck(L, !inserted, pos, "Item has already been inserted");
     return id;
@@ -53,7 +53,7 @@ lay_id lualay_id_check_notinserted(lua_State* L, lay_context *ctx, int pos)
 int lualay_context_gc(lua_State* L)
 {
     lay_context* ctx = lualay_context_check(L);
-    lay_context_destroy(ctx);
+    lay_destroy_context(ctx);
     return 0;
 }
 
@@ -61,7 +61,7 @@ int lualay_context_capacity(lua_State* L)
 {
     lay_context *ctx = lualay_context_check(L);
     lua_settop(L, 0);
-    lay_id cap = lay_context_item_capacity(ctx);
+    lay_id cap = lay_items_capacity(ctx);
     if (cap > (lay_id)INT_MAX)
         lua_pushinteger(L, INT_MAX);
     else
@@ -69,12 +69,12 @@ int lualay_context_capacity(lua_State* L)
     return 1;
 }
 
-int lualay_context_reserve(lua_State* L)
+int lualay_reserve_items_capacity(lua_State* L)
 {
     lay_context *ctx = lualay_context_check(L);
     int n = (int)luaL_checkinteger(L, 2);
     luaL_argcheck(L, n >= 0, 2, "Zero or positive integer capacity expected");
-    lay_context_reserve(ctx, (lay_id)n);
+    lay_reserve_items_capacity(ctx, (lay_id)n);
     return 0;
 }
 
@@ -85,17 +85,17 @@ int lualay_item_new(lua_State* L)
     return 1;
 }
 
-int lualay_context_run(lua_State* L)
+int lualay_run_context(lua_State* L)
 {
     lay_context *ctx = lualay_context_check(L);
-    lay_context_run(ctx);
+    lay_run_context(ctx);
     return 0;
 }
 
-int lualay_context_reset(lua_State* L)
+int lualay_reset_context(lua_State* L)
 {
     lay_context *ctx = lualay_context_check(L);
-    lay_context_reset(ctx);
+    lay_reset_context(ctx);
     return 0;
 }
 
@@ -132,7 +132,7 @@ int lualay_item_size_set(lua_State* L)
     lay_id item = lualay_id_check(L, ctx, 2);
     lay_scalar w = (lay_scalar)LUALAY_CHECK_SCALAR(L, 3);
     lay_scalar h = (lay_scalar)LUALAY_CHECK_SCALAR(L, 4);
-    lay_size_set_xy(ctx, item, w, h);
+    lay_set_size_xy(ctx, item, w, h);
     return 0;
 }
 
@@ -144,15 +144,15 @@ int lualay_item_margins_set(lua_State* L)
     lay_scalar t = (lay_scalar)LUALAY_CHECK_SCALAR(L, 4);
     lay_scalar r = (lay_scalar)LUALAY_CHECK_SCALAR(L, 5);
     lay_scalar b = (lay_scalar)LUALAY_CHECK_SCALAR(L, 6);
-    lay_margins_set_ltrb(ctx, item, l, t, r, b);
+    lay_set_margins_ltrb(ctx, item, l, t, r, b);
     return 0;
 }
 
-int lualay_rect_get(lua_State* L)
+int lualay_get_rect(lua_State* L)
 {
     lay_context *ctx = lualay_context_check(L);
     lay_id item = lualay_id_check(L, ctx, 2);
-    lay_vec4 rect = lay_rect_get(ctx, item);
+    lay_vec4 rect = lay_get_rect(ctx, item);
     LUALAY_PUSH_SCALAR(L, rect[0]);
     LUALAY_PUSH_SCALAR(L, rect[1]);
     LUALAY_PUSH_SCALAR(L, rect[2]);
@@ -172,7 +172,7 @@ int lualay_item_contain_set(lua_State* L)
         flags |= luaL_checkinteger(L, i);
         luaL_argcheck(L, (flags & LAY_ITEM_BOX_MASK) == flags, i, "Invalid container flag");
     }
-    lay_contain_set(ctx, item, flags);
+    lay_set_contain(ctx, item, flags);
     return 0;
 }
 int lualay_item_behave_set(lua_State* L)
@@ -185,7 +185,7 @@ int lualay_item_behave_set(lua_State* L)
         flags |= luaL_checkinteger(L, i);
         luaL_argcheck(L, (flags & LAY_ITEM_LAYOUT_MASK) == flags, i, "Invalid behavior flag");
     }
-    lay_behave_set(ctx, item, flags);
+    lay_set_behave(ctx, item, flags);
     return 0;
 }
 
@@ -195,7 +195,7 @@ int lualay_item_next_sibling(lua_State* L)
     lay_id item = lualay_id_check(L, ctx, 2);
     lay_id id_next = lay_next_sibling(ctx, item);
     lua_settop(L, 0);
-    // lay_id is uint32_t by default, and LAY_ID_INVALID is uint32_t max, so we
+    // lay_id is uint32_t by default, and LAY_INVALID_ID is uint32_t max, so we
     // need to check if it's out of range
     if (id_next >= (lay_id)INT_MAX)
         lua_pushinteger(L, -1);
@@ -219,10 +219,10 @@ int lualay_item_first_child(lua_State* L)
 
 static const struct luaL_reg laylib[] = {
     {"new", lualay_context_new},
-    {"run", lualay_context_run},
-    {"reset", lualay_context_reset},
+    {"run", lualay_run_context},
+    {"reset", lualay_reset_context},
     {"capacity", lualay_context_capacity},
-    {"reserve", lualay_context_reserve},
+    {"reserve", lualay_reserve_items_capacity},
     {"item", lualay_item_new},
     {"insert", lualay_item_insert},
     {"append", lualay_item_append},
@@ -231,7 +231,7 @@ static const struct luaL_reg laylib[] = {
     {"set_margins", lualay_item_margins_set},
     {"set_contain", lualay_item_contain_set},
     {"set_behave", lualay_item_behave_set},
-    {"rect", lualay_rect_get},
+    {"rect", lualay_get_rect},
     {"next_sibling", lualay_item_next_sibling},
     {"first_child", lualay_item_first_child},
     {"__gc", lualay_context_gc},

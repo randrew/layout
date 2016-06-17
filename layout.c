@@ -24,7 +24,7 @@ static LAY_FORCE_INLINE float lay_float_max(float a, float b)
 static LAY_FORCE_INLINE float lay_float_min(float a, float b)
 { return a < b ? a : b; }
 
-void lay_context_init(lay_context *ctx)
+void lay_init_context(lay_context *ctx)
 {
     ctx->capacity = 0;
     ctx->count = 0;
@@ -32,7 +32,7 @@ void lay_context_init(lay_context *ctx)
     ctx->rects = NULL;
 }
 
-void lay_context_reserve(lay_context *ctx, lay_id count)
+void lay_reserve_items_capacity(lay_context *ctx, lay_id count)
 {
     if (count >= ctx->capacity) {
         ctx->capacity = count;
@@ -43,7 +43,7 @@ void lay_context_reserve(lay_context *ctx, lay_id count)
     }
 }
 
-void lay_context_destroy(lay_context *ctx)
+void lay_destroy_context(lay_context *ctx)
 {
     if (ctx->items != NULL) {
         free(ctx->items);
@@ -52,13 +52,13 @@ void lay_context_destroy(lay_context *ctx)
     }
 }
 
-void lay_context_reset(lay_context *ctx)
+void lay_reset_context(lay_context *ctx)
 { ctx->count = 0; }
 
 static void lay_calc_size(lay_context *ctx, lay_id item, int dim);
 static void lay_arrange(lay_context *ctx, lay_id item, int dim);
 
-void lay_context_run(lay_context *ctx)
+void lay_run_context(lay_context *ctx)
 {
     LAY_ASSERT(ctx != NULL);
 
@@ -76,7 +76,7 @@ void lay_context_run(lay_context *ctx)
     // Alternatively, we could use a flag bit to indicate whether an item's
     // children have already been wrapped and may need re-wrapping.
     for (lay_id i = 0; i < ctx->count; ++i) {
-        lay_item_t *pitem = lay_item_get(ctx, i);
+        lay_item_t *pitem = lay_get_item(ctx, i);
         pitem->flags = pitem->flags & ~LAY_BREAK;
     }
 
@@ -88,13 +88,13 @@ void lay_context_run(lay_context *ctx)
     }
 }
 
-lay_id lay_context_item_count(lay_context *ctx)
+lay_id lay_items_count(lay_context *ctx)
 {
     LAY_ASSERT(ctx != NULL);
     return ctx->count;
 }
 
-lay_id lay_context_item_capacity(lay_context *ctx)
+lay_id lay_items_capacity(lay_context *ctx)
 {
     LAY_ASSERT(ctx != NULL);
     return ctx->capacity;
@@ -112,11 +112,11 @@ lay_id lay_item(lay_context *ctx)
         ctx->rects = (lay_vec4*)past_last;
     }
 
-    lay_item_t *item = lay_item_get(ctx, idx);
+    lay_item_t *item = lay_get_item(ctx, idx);
     // We can either do this here, or when creating/resetting buffer
     memset(item, 0, sizeof(lay_item_t));
-    item->first_child = LAY_ID_INVALID;
-    item->next_sibling = LAY_ID_INVALID;
+    item->first_child = LAY_INVALID_ID;
+    item->next_sibling = LAY_INVALID_ID;
     // hmm
     memset(&ctx->rects[idx], 0, sizeof(lay_vec4));
     return idx;
@@ -134,16 +134,16 @@ void lay_append_by_ptr(
 
 lay_id lay_last_child(const lay_context *ctx, lay_id parent)
 {
-    lay_item_t *pparent = lay_item_get(ctx, parent);
+    lay_item_t *pparent = lay_get_item(ctx, parent);
     lay_id child = pparent->first_child;
-    if (child == LAY_ID_INVALID) return LAY_ID_INVALID;
-    lay_item_t *pchild = lay_item_get(ctx, child);
+    if (child == LAY_INVALID_ID) return LAY_INVALID_ID;
+    lay_item_t *pchild = lay_get_item(ctx, child);
     lay_id result = child;
     for (;;) {
         lay_id next = pchild->next_sibling;
-        if (next == LAY_ID_INVALID) break;
+        if (next == LAY_INVALID_ID) break;
         result = next;
-        pchild = lay_item_get(ctx, next);
+        pchild = lay_get_item(ctx, next);
     }
     return result;
 }
@@ -152,8 +152,8 @@ void lay_append(lay_context *ctx, lay_id earlier, lay_id later)
 {
     LAY_ASSERT(later != 0); // Must not be root item
     LAY_ASSERT(earlier != later); // Must not be same item id
-    lay_item_t *LAY_RESTRICT pearlier = lay_item_get(ctx, earlier);
-    lay_item_t *LAY_RESTRICT plater = lay_item_get(ctx, later);
+    lay_item_t *LAY_RESTRICT pearlier = lay_get_item(ctx, earlier);
+    lay_item_t *LAY_RESTRICT plater = lay_get_item(ctx, later);
     lay_append_by_ptr(pearlier, later, plater);
 }
 
@@ -161,22 +161,22 @@ void lay_insert(lay_context *ctx, lay_id parent, lay_id child)
 {
     LAY_ASSERT(child != 0); // Must not be root item
     LAY_ASSERT(parent != child); // Must not be same item id
-    lay_item_t *LAY_RESTRICT pparent = lay_item_get(ctx, parent);
-    lay_item_t *LAY_RESTRICT pchild = lay_item_get(ctx, child);
+    lay_item_t *LAY_RESTRICT pparent = lay_get_item(ctx, parent);
+    lay_item_t *LAY_RESTRICT pchild = lay_get_item(ctx, child);
     LAY_ASSERT(!(pchild->flags & LAY_ITEM_INSERTED));
     // Parent has no existing children, make inserted item the first child.
-    if (pparent->first_child == LAY_ID_INVALID) {
+    if (pparent->first_child == LAY_INVALID_ID) {
         pparent->first_child = child;
         pchild->flags |= LAY_ITEM_INSERTED;
     // Parent has existing items, iterate to find the last child and append the
     // inserted item after it.
     } else {
         lay_id next = pparent->first_child;
-        lay_item_t *LAY_RESTRICT pnext = lay_item_get(ctx, next);
+        lay_item_t *LAY_RESTRICT pnext = lay_get_item(ctx, next);
         for (;;) {
             next = pnext->next_sibling;
-            if (next == LAY_ID_INVALID) break;
-            pnext = lay_item_get(ctx, next);
+            if (next == LAY_INVALID_ID) break;
+            pnext = lay_get_item(ctx, next);
         }
         lay_append_by_ptr(pnext, child, pchild);
     }
@@ -186,26 +186,26 @@ void lay_push(lay_context *ctx, lay_id parent, lay_id new_child)
 {
     LAY_ASSERT(new_child != 0); // Must not be root item
     LAY_ASSERT(parent != new_child); // Must not be same item id
-    lay_item_t *LAY_RESTRICT pparent = lay_item_get(ctx, parent);
+    lay_item_t *LAY_RESTRICT pparent = lay_get_item(ctx, parent);
     lay_id old_child = pparent->first_child;
-    lay_item_t *LAY_RESTRICT pchild = lay_item_get(ctx, new_child);
+    lay_item_t *LAY_RESTRICT pchild = lay_get_item(ctx, new_child);
     LAY_ASSERT(!(pchild->flags & LAY_ITEM_INSERTED));
     pparent->first_child = new_child;
     pchild->flags |= LAY_ITEM_INSERTED;
     pchild->next_sibling = old_child;
 }
 
-lay_vec2 lay_size_get(lay_context *ctx, lay_id item)
+lay_vec2 lay_get_size(lay_context *ctx, lay_id item)
 {
-    lay_item_t *pitem = lay_item_get(ctx, item);
+    lay_item_t *pitem = lay_get_item(ctx, item);
     return pitem->size;
 }
 
-void lay_size_set_xy(
+void lay_set_size_xy(
         lay_context *ctx, lay_id item,
         lay_scalar width, lay_scalar height)
 {
-    lay_item_t *pitem = lay_item_get(ctx, item);
+    lay_item_t *pitem = lay_get_item(ctx, item);
     pitem->size[0] = width;
     pitem->size[1] = height;
     uint32_t flags = pitem->flags;
@@ -220,29 +220,29 @@ void lay_size_set_xy(
     pitem->flags = flags;
 }
 
-void lay_behave_set(lay_context *ctx, lay_id item, uint32_t flags)
+void lay_set_behave(lay_context *ctx, lay_id item, uint32_t flags)
 {
     LAY_ASSERT((flags & LAY_ITEM_LAYOUT_MASK) == flags);
-    lay_item_t *pitem = lay_item_get(ctx, item);
+    lay_item_t *pitem = lay_get_item(ctx, item);
     pitem->flags = (pitem->flags & ~LAY_ITEM_LAYOUT_MASK) | flags;
 }
 
-void lay_contain_set(lay_context *ctx, lay_id item, uint32_t flags)
+void lay_set_contain(lay_context *ctx, lay_id item, uint32_t flags)
 {
     LAY_ASSERT((flags & LAY_ITEM_BOX_MASK) == flags);
-    lay_item_t *pitem = lay_item_get(ctx, item);
+    lay_item_t *pitem = lay_get_item(ctx, item);
     pitem->flags = (pitem->flags & ~LAY_ITEM_BOX_MASK) | flags;
 }
-void lay_margins_set(lay_context *ctx, lay_id item, lay_vec4 ltrb)
+void lay_set_margins(lay_context *ctx, lay_id item, lay_vec4 ltrb)
 {
-    lay_item_t *pitem = lay_item_get(ctx, item);
+    lay_item_t *pitem = lay_get_item(ctx, item);
     pitem->margins = ltrb;
 }
-void lay_margins_set_ltrb(
+void lay_set_margins_ltrb(
         lay_context *ctx, lay_id item,
         lay_scalar l, lay_scalar t, lay_scalar r, lay_scalar b)
 {
-    lay_item_t *pitem = lay_item_get(ctx, item);
+    lay_item_t *pitem = lay_get_item(ctx, item);
     // Alternative, uses stack and addressed writes
     //pitem->margins = lay_vec4_xyzw(l, t, r, b);
     // Alternative, uses rax and left-shift
@@ -254,8 +254,8 @@ void lay_margins_set_ltrb(
     pitem->margins[3] = b;
 }
 
-lay_vec4 lay_margins_get(lay_context *ctx, lay_id item)
-{ return lay_item_get(ctx, item)->margins; }
+lay_vec4 lay_get_margins(lay_context *ctx, lay_id item)
+{ return lay_get_item(ctx, item)->margins; }
 
 // TODO restrict item ptrs correctly
 static LAY_FORCE_INLINE
@@ -263,11 +263,11 @@ lay_scalar lay_calc_overlayed_size(
         lay_context *ctx, lay_id item, int dim)
 {
     const int wdim = dim + 2;
-    lay_item_t *LAY_RESTRICT pitem = lay_item_get(ctx, item);
+    lay_item_t *LAY_RESTRICT pitem = lay_get_item(ctx, item);
     lay_scalar need_size = 0;
     lay_id child = pitem->first_child;
-    while (child != LAY_ID_INVALID) {
-        lay_item_t *pchild = lay_item_get(ctx, child);
+    while (child != LAY_INVALID_ID) {
+        lay_item_t *pchild = lay_get_item(ctx, child);
         lay_vec4 rect = ctx->rects[child];
         // width = start margin + calculated width + end margin
         lay_scalar child_size = rect[dim] + rect[2 + dim] + pchild->margins[wdim];
@@ -282,11 +282,11 @@ lay_scalar lay_calc_stacked_size(
         lay_context *ctx, lay_id item, int dim)
 {
     const int wdim = dim + 2;
-    lay_item_t *LAY_RESTRICT pitem = lay_item_get(ctx, item);
+    lay_item_t *LAY_RESTRICT pitem = lay_get_item(ctx, item);
     lay_scalar need_size = 0;
     lay_id child = pitem->first_child;
-    while (child != LAY_ID_INVALID) {
-        lay_item_t *pchild = lay_item_get(ctx, child);
+    while (child != LAY_INVALID_ID) {
+        lay_item_t *pchild = lay_get_item(ctx, child);
         lay_vec4 rect = ctx->rects[child];
         need_size += rect[dim] + rect[2 + dim] + pchild->margins[wdim];
         child = pchild->next_sibling;
@@ -299,12 +299,12 @@ lay_scalar lay_calc_wrapped_overlayed_size(
         lay_context *ctx, lay_id item, int dim)
 {
     const int wdim = dim + 2;
-    lay_item_t *LAY_RESTRICT pitem = lay_item_get(ctx, item);
+    lay_item_t *LAY_RESTRICT pitem = lay_get_item(ctx, item);
     lay_scalar need_size = 0;
     lay_scalar need_size2 = 0;
     lay_id child = pitem->first_child;
-    while (child != LAY_ID_INVALID) {
-        lay_item_t *pchild = lay_item_get(ctx, child);
+    while (child != LAY_INVALID_ID) {
+        lay_item_t *pchild = lay_get_item(ctx, child);
         lay_vec4 rect = ctx->rects[child];
         if (pchild->flags & LAY_BREAK) {
             need_size2 += need_size;
@@ -323,12 +323,12 @@ lay_scalar lay_calc_wrapped_stacked_size(
         lay_context *ctx, lay_id item, int dim)
 {
     const int wdim = dim + 2;
-    lay_item_t *LAY_RESTRICT pitem = lay_item_get(ctx, item);
+    lay_item_t *LAY_RESTRICT pitem = lay_get_item(ctx, item);
     lay_scalar need_size = 0;
     lay_scalar need_size2 = 0;
     lay_id child = pitem->first_child;
-    while (child != LAY_ID_INVALID) {
-        lay_item_t *pchild = lay_item_get(ctx, child);
+    while (child != LAY_INVALID_ID) {
+        lay_item_t *pchild = lay_get_item(ctx, child);
         lay_vec4 rect = ctx->rects[child];
         if (pchild->flags & LAY_BREAK) {
             need_size2 = lay_scalar_max(need_size2, need_size);
@@ -342,14 +342,14 @@ lay_scalar lay_calc_wrapped_stacked_size(
 
 static void lay_calc_size(lay_context *ctx, lay_id item, int dim)
 {
-    lay_item_t *pitem = lay_item_get(ctx, item);
+    lay_item_t *pitem = lay_get_item(ctx, item);
 
     lay_id child = pitem->first_child;
-    while (child != LAY_ID_INVALID) {
+    while (child != LAY_INVALID_ID) {
         // NOTE: this is recursive and will run out of stack space if items are
         // nested too deeply.
         lay_calc_size(ctx, child, dim);
-        lay_item_t *pchild = lay_item_get(ctx, child);
+        lay_item_t *pchild = lay_get_item(ctx, child);
         child = pchild->next_sibling;
     }
 
@@ -405,7 +405,7 @@ void lay_arrange_stacked(
             lay_context *ctx, lay_id item, int dim, bool wrap)
 {
     const int wdim = dim + 2;
-    lay_item_t *pitem = lay_item_get(ctx, item);
+    lay_item_t *pitem = lay_get_item(ctx, item);
 
     const uint32_t item_flags = pitem->flags;
     lay_vec4 rect = ctx->rects[item];
@@ -414,7 +414,7 @@ void lay_arrange_stacked(
     float max_x2 = (float)(rect[dim] + space);
 
     lay_id start_child = pitem->first_child;
-    while (start_child != LAY_ID_INVALID) {
+    while (start_child != LAY_INVALID_ID) {
         lay_scalar used = 0;
         uint32_t count = 0; // count of fillers
         uint32_t squeezed_count = 0; // count of squeezable elements
@@ -423,9 +423,9 @@ void lay_arrange_stacked(
         // first pass: count items that need to be expanded,
         // and the space that is used
         lay_id child = start_child;
-        lay_id end_child = LAY_ID_INVALID;
-        while (child != LAY_ID_INVALID) {
-            lay_item_t *pchild = lay_item_get(ctx, child);
+        lay_id end_child = LAY_INVALID_ID;
+        while (child != LAY_INVALID_ID) {
+            lay_item_t *pchild = lay_get_item(ctx, child);
             const uint32_t child_flags = pchild->flags;
             const uint32_t flags = (child_flags & LAY_ITEM_LAYOUT_MASK) >> dim;
             const uint32_t fflags = (child_flags & LAY_ITEM_FIXED_MASK) >> dim;
@@ -470,7 +470,7 @@ void lay_arrange_stacked(
                 case LAY_JUSTIFY:
                     // justify when not wrapping or not in last line,
                     // or not manually breaking
-                    if (!wrap || ((end_child != LAY_ID_INVALID) && !hardbreak))
+                    if (!wrap || ((end_child != LAY_INVALID_ID) && !hardbreak))
                         spacer = (float)extra_space / (float)(total - 1);
                     break;
                 case LAY_START:
@@ -505,7 +505,7 @@ void lay_arrange_stacked(
         child = start_child;
         while (child != end_child) {
             lay_scalar ix0, ix1;
-            lay_item_t *pchild = lay_item_get(ctx, child);
+            lay_item_t *pchild = lay_get_item(ctx, child);
             const uint32_t child_flags = pchild->flags;
             const uint32_t flags = (child_flags & LAY_ITEM_LAYOUT_MASK) >> dim;
             const uint32_t fflags = (child_flags & LAY_ITEM_FIXED_MASK) >> dim;
@@ -541,14 +541,14 @@ static LAY_FORCE_INLINE
 void lay_arrange_overlay(lay_context *ctx, lay_id item, int dim)
 {
     const int wdim = dim + 2;
-    lay_item_t *pitem = lay_item_get(ctx, item);
+    lay_item_t *pitem = lay_get_item(ctx, item);
     const lay_vec4 rect = ctx->rects[item];
     const lay_scalar offset = rect[dim];
     const lay_scalar space = rect[2 + dim];
     
     lay_id child = pitem->first_child;
-    while (child != LAY_ID_INVALID) {
-        lay_item_t *pchild = lay_item_get(ctx, child);
+    while (child != LAY_INVALID_ID) {
+        lay_item_t *pchild = lay_get_item(ctx, child);
         const uint32_t b_flags = (pchild->flags & LAY_ITEM_LAYOUT_MASK) >> dim;
         const lay_vec4 child_margins = pchild->margins;
         lay_vec4 child_rect = ctx->rects[child];
@@ -582,7 +582,7 @@ void lay_arrange_overlay_squeezed_range(
     int wdim = dim + 2;
     lay_id item = start_item;
     while (item != end_item) {
-        lay_item_t *pitem = lay_item_get(ctx, item);
+        lay_item_t *pitem = lay_get_item(ctx, item);
         const uint32_t b_flags = (pitem->flags & LAY_ITEM_LAYOUT_MASK) >> dim;
         const lay_vec4 margins = pitem->margins;
         lay_vec4 rect = ctx->rects[item];
@@ -614,13 +614,13 @@ lay_scalar lay_arrange_wrapped_overlay_squeezed(
         lay_context *ctx, lay_id item, int dim)
 {
     const int wdim = dim + 2;
-    lay_item_t *pitem = lay_item_get(ctx, item);
+    lay_item_t *pitem = lay_get_item(ctx, item);
     lay_scalar offset = ctx->rects[item][dim];
     lay_scalar need_size = 0;
     lay_id child = pitem->first_child;
     lay_id start_child = child;
-    while (child != LAY_ID_INVALID) {
-        lay_item_t *pchild = lay_item_get(ctx, child);
+    while (child != LAY_INVALID_ID) {
+        lay_item_t *pchild = lay_get_item(ctx, child);
         if (pchild->flags & LAY_BREAK) {
             lay_arrange_overlay_squeezed_range(ctx, dim, start_child, child, offset, need_size);
             offset += need_size;
@@ -632,14 +632,14 @@ lay_scalar lay_arrange_wrapped_overlay_squeezed(
         need_size = lay_scalar_max(need_size, child_size);
         child = pchild->next_sibling;
     }
-    lay_arrange_overlay_squeezed_range(ctx, dim, start_child, LAY_ID_INVALID, offset, need_size);
+    lay_arrange_overlay_squeezed_range(ctx, dim, start_child, LAY_INVALID_ID, offset, need_size);
     offset += need_size;
     return offset;
 }
 
 static void lay_arrange(lay_context *ctx, lay_id item, int dim)
 {
-    lay_item_t *pitem = lay_item_get(ctx, item);
+    lay_item_t *pitem = lay_get_item(ctx, item);
 
     const uint32_t flags = pitem->flags;
     switch (flags & LAY_ITEM_BOX_MODEL_MASK) {
@@ -664,7 +664,7 @@ static void lay_arrange(lay_context *ctx, lay_id item, int dim)
         } else {
             const lay_vec4 rect = ctx->rects[item];
             lay_arrange_overlay_squeezed_range(
-                ctx, dim, pitem->first_child, LAY_ID_INVALID,
+                ctx, dim, pitem->first_child, LAY_INVALID_ID,
                 rect[dim], rect[2 + dim]);
         }
         break;
@@ -673,11 +673,11 @@ static void lay_arrange(lay_context *ctx, lay_id item, int dim)
         break;
     }
     lay_id child = pitem->first_child;
-    while (child != LAY_ID_INVALID) {
+    while (child != LAY_INVALID_ID) {
         // NOTE: this is recursive and will run out of stack space if items are
         // nested too deeply.
         lay_arrange(ctx, child, dim);
-        lay_item_t *pchild = lay_item_get(ctx, child);
+        lay_item_t *pchild = lay_get_item(ctx, child);
         child = pchild->next_sibling;
     }
 }
