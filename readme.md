@@ -5,6 +5,8 @@ A simple/fast stacking box layout library. It's useful for calculating layouts
 for things like 2D user interfaces. It compiles as C99 or C++. It's tested with
 gcc (mingw64), VS2015, and clang/LLVM. *Layout* has no external dependencies.
 
+![](https://raw.githubusercontent.com/wiki/randrew/layoutexample/ui_anim_small.gif)
+
 *Layout* comes with a small set of tests as a build target, along with a
 primitive benchmark and example usage of the library as a Lua .dll module.
 
