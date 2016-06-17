@@ -221,6 +221,7 @@ LAY_EXPORT void lay_append(lay_context *ctx, lay_id earlier, lay_id later);
 LAY_EXPORT void lay_insert(lay_context *ctx, lay_id parent, lay_id child);
 LAY_EXPORT void lay_push(lay_context *ctx, lay_id parent, lay_id child);
 LAY_EXPORT lay_vec2 lay_get_size(lay_context *ctx, lay_id item);
+LAY_EXPORT void lay_set_size(lay_context *ctx, lay_id item, lay_vec2 size);
 LAY_EXPORT void lay_set_size_xy(lay_context *ctx, lay_id item, lay_scalar width, lay_scalar height);
 LAY_EXPORT void lay_set_contain(lay_context *ctx, lay_id item, uint32_t flags);
 LAY_EXPORT void lay_set_behave(lay_context *ctx, lay_id item, uint32_t flags);

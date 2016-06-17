@@ -201,6 +201,23 @@ lay_vec2 lay_get_size(lay_context *ctx, lay_id item)
     return pitem->size;
 }
 
+
+void lay_set_size(lay_context *ctx, lay_id item, lay_vec2 size)
+{
+    lay_item_t *pitem = lay_get_item(ctx, item);
+    pitem->size = size;
+    uint32_t flags = pitem->flags;
+    if (size[0] == 0)
+        flags &= ~LAY_ITEM_HFIXED;
+    else
+        flags |= LAY_ITEM_HFIXED;
+    if (size[1] == 0)
+        flags &= ~LAY_ITEM_VFIXED;
+    else
+        flags |= LAY_ITEM_VFIXED;
+    pitem->flags = flags;
+}
+
 void lay_set_size_xy(
         lay_context *ctx, lay_id item,
         lay_scalar width, lay_scalar height)
@@ -208,6 +225,7 @@ void lay_set_size_xy(
     lay_item_t *pitem = lay_get_item(ctx, item);
     pitem->size[0] = width;
     pitem->size[1] = height;
+    // Kinda redundant, whatever
     uint32_t flags = pitem->flags;
     if (width == 0)
         flags &= ~LAY_ITEM_HFIXED;
