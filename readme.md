@@ -94,13 +94,13 @@ by defining `LAY_FLOAT`. If you are building the tests, benchmarks, or Lua
 module for *Layout*, you can configure this when you invoke GENie:
 
 ```
-./genie gmake --cords=float
+./genie gmake --coords=float
 ```
 
 or if you want to specify integer (the default):
 
 ```
-./genie gmake --cords=integer
+./genie gmake --coords=integer
 ```
 
 If you are building *Layout* to use floating point coordinates, and if you want
