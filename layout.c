@@ -502,7 +502,7 @@ void lay_arrange_stacked(
                 }
             }
         }
-#if LAY_FLOAT == 1
+#ifdef LAY_FLOAT
         // In floating point, it's possible to end up with some small negative
         // value for extra_space, while also have a 0.0 squeezed_count. This
         // would cause divide by zero. Instead, we'll check to see if

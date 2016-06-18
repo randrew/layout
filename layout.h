@@ -27,14 +27,25 @@ typedef float lay_scalar;
 typedef int16_t lay_scalar;
 #endif
 
+// GCC and Clang allow us to create vectors based on a type with the
+// vector_size extension. This will allow us to access individual components of
+// the vector via indexing operations.
 #if defined(__GNUC__) || defined(__clang__)
-#if LAY_FLOAT == 1
+
+// Using floats for coordinates takes up more space than using int16. 128 bits.
+// If you want to use __m128 for SSE, this is where you'd typedef it.
+#ifdef LAY_FLOAT
 typedef float lay_vec4 __attribute__ ((__vector_size__ (16), aligned(16)));
 typedef float lay_vec2 __attribute__ ((__vector_size__ (8), aligned(8)));
+// Integer version uses 64 bits.
 #else
 typedef int16_t lay_vec4 __attribute__ ((__vector_size__ (8), aligned(8)));
 typedef int16_t lay_vec2 __attribute__ ((__vector_size__ (4), aligned(4)));
 #endif // LAY_FLOAT
+
+// MSVC doesn't have the vetor_size attribute, but we want convenient indexing
+// operators for our layout logic code. Therefore, we force C++ compilation in
+// MSVC, and use C++ operator overloading.
 #elif defined(_MSC_VER)
 struct lay_vec4 {
     lay_scalar xyzw[4];
@@ -50,7 +61,7 @@ struct lay_vec2 {
     lay_scalar& operator[](int index)
     { return xy[index]; }
 };
-#endif // __GNUC__ or _MSC_VER
+#endif // __GNUC__/__clang__ or _MSC_VER
 
 #ifndef LAY_INVALID_ID
 #define LAY_INVALID_ID UINT32_MAX
