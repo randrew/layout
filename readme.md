@@ -114,3 +114,112 @@ do all of that, and if you build *Layout* as a shared library or a static
 library without linker optimizations enabled in MSVC, you might want to also
 consider using `__vectorcall`, which may help reduce overhead when calling
 functions which receive or return SSE values.
+
+Example
+=======
+
+```C
+#include "layout.h"
+
+// Let's pretend we're creating some kind of GUI with a master list on the
+// left, and the content view on the right.
+
+// We first need one of these
+lay_context ctx;
+
+// And we need to initialize it
+lay_init_context(&ctx);
+
+// The context will automatically resize its heap buffer to grow as needed
+// during use. But we can avoid multiple reallocations by reserving as much
+// space as we'll need up-front. Don't worry, lay_init_context doesn't do any
+// allocations, so this is our first and only alloc.
+lay_reserve_items_capacity(&ctx, 1024);
+
+// Create our root item. Items are just 2D boxes.
+lay_id root = lay_item(&ctx);
+
+// Let's pretend we have a window in our game or OS of some known dimension.
+// We'll want to explicitly set our root item to be that size.
+lay_set_size_xy(&ctx, root, 1280, 720);
+
+// Set our root item to arrange its children in a row, left-to-right, in the
+// order they are inserted.
+lay_set_contain(&ctx, root, LAY_ROW);
+
+// Create the item for our master list.
+lay_id master_list = lay_item(&ctx);
+lay_insert(&ctx, root, master_list);
+// Our master list has a specific fixed width, but we want it to fill all
+// available vertical space.
+lay_set_size_xy(&ctx, master_list, 400, 0);
+// We set our item's behavior within its parent to desire filling up available
+// vertical space.
+lay_set_behave(&ctx, master_list, LAY_VFILL);
+// And we set it so that it will lay out its children in a column,
+// top-to-bottom, in the order they are inserted.
+lay_set_contain(&ctx, master_list, LAY_COLUMN);
+
+lay_id content_view = lay_item(&ctx);
+lay_insert(&ctx, root, content_view);
+// The content view just wants to fill up all of the remaining space, so we
+// don't need to set any size on it.
+//
+// We could just set LAY_FILL here instead of bitwise-or'ing LAY_HFILL and
+// LAY_VFILL, but I want to demonstrate that this is how you combine flags.
+lay_set_behave(&ctx, content_view, LAY_HFILL | LAY_VFILL);
+
+// Normally at this point, we would probably want to create items for our
+// master list and our content view and insert them. This is just a dumb fake
+// example, so let's move on to finishing up.
+
+// Run the context -- this does all of the actual calculations.
+lay_run_context(&ctx);
+
+// Now we can get the calculated size of our items as 2D rectangles. The four
+// components of the vector represent x and y of the top left corner, and then
+// the width and height.
+lay_vec4 master_list_rect = lay_get_rect(&ctx, master_list);
+lay_vec4 content_view_rect = lay_get_rect(&ctx, content_view);
+
+// master_list_rect  == {  0, 0, 400, 720}
+// content_view_rect == {400, 0, 880, 720}
+
+// If we're using an immediate-mode graphics library, we could draw our boxes
+// with it now.
+my_ui_library_draw_box_x_y_width_height(
+    master_list_rect[0],
+    master_list_rect[1],
+    master_list_rect[2],
+    master_list_rect[3]);
+
+// You could also recursively go through the entire item hierarchy using
+// lay_first_child and lay_next_sibling, or something like that.
+
+// After you've used lay_run_context, the results should remain valid unless a
+// reallocation occurs.
+//
+// However, while it's true that you could manually update the existing items
+// in the context by using lay_set_size{_xy}, and then calling lay_run_context
+// again, you might want to consider just rebuilding everything from scratch
+// every frame. This is a lot easier to program than tedious fine-grained
+// invalidation, and a context with thousands of items will probably still only
+// take a handful of microseconds.
+//
+// There's no way to remove items -- once you create them and insert them,
+// that's it. If we want to reset our context so that we can rebuild our layout
+// tree from scratch, we use lay_reset_context:
+
+lay_reset_context(&ctx);
+
+// And now we could start over with creating the root item, inserting more
+// items, etc. The reason we don't create a new context from scratch is that we
+// want to reuse the buffer that was already allocated.
+
+// But let's pretend we're shutting down our program -- we need to destroy our
+// context.
+lay_destroy_context(&ctx);
+
+// The heap-allocated buffer is now freed. The context is now invalid for use
+// until lay_init_context is called on it again.
+```
