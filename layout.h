@@ -1,11 +1,16 @@
 #pragma once
 
-#include <stddef.h>
 #include <stdint.h>
-#include <assert.h>
 
 #ifndef LAY_EXPORT
 #define LAY_EXPORT extern
+#endif
+
+// Users of this library can define LAY_ASSERT if they would like to use an
+// assert other than the one from assert.h.
+#ifndef LAY_ASSERT
+#include <assert.h>
+#define LAY_ASSERT assert
 #endif
 
 // 'static inline' for things we always want inlined -- the compiler should not
@@ -18,8 +23,6 @@
 #define LAY_STATIC_INLINE inline static
 #endif
 
-#define LAY_ASSERT assert
-
 typedef uint32_t lay_id;
 #if LAY_FLOAT == 1
 typedef float lay_scalar;
@@ -27,13 +30,18 @@ typedef float lay_scalar;
 typedef int16_t lay_scalar;
 #endif
 
+#define LAY_INVALID_ID UINT32_MAX
+
 // GCC and Clang allow us to create vectors based on a type with the
 // vector_size extension. This will allow us to access individual components of
 // the vector via indexing operations.
 #if defined(__GNUC__) || defined(__clang__)
 
 // Using floats for coordinates takes up more space than using int16. 128 bits.
-// If you want to use __m128 for SSE, this is where you'd typedef it.
+// If you want to use __m128 for SSE, this is where you'd typedef it. If you do
+// that, then make sure you take care of allocating aligned buffers via
+// LAY_REALLOC if your platform's realloc doesn't meet the alignment
+// requirements.
 #ifdef LAY_FLOAT
 typedef float lay_vec4 __attribute__ ((__vector_size__ (16), aligned(16)));
 typedef float lay_vec2 __attribute__ ((__vector_size__ (8), aligned(8)));
@@ -62,10 +70,6 @@ struct lay_vec2 {
     { return xy[index]; }
 };
 #endif // __GNUC__/__clang__ or _MSC_VER
-
-#ifndef LAY_INVALID_ID
-#define LAY_INVALID_ID UINT32_MAX
-#endif
 
 typedef struct lay_item_t {
     uint32_t flags;

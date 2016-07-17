@@ -1,7 +1,23 @@
 #include "layout.h"
+#include <stddef.h>
 #include <stdbool.h>
-#include <string.h> // memset
-#include <stdlib.h> // realloc
+
+// Users of this library can define LAY_REALLOC to use a custom (re)allocator
+// instead of stdlib's realloc. It should have the same behavior as realloc --
+// first parameter type is a void pointer, and its value is either a null
+// pointer or an existing pointer. The second parameter is a size_t of the new
+// desired size. The buffer contents should be preserved across reallocations.
+#ifndef LAY_REALLOC
+#include <stdlib.h>
+#define LAY_REALLOC(_block, _size) realloc(_block, _size)
+#endif
+
+// Like the LAY_REALLOC define, LAY_MEMSET can be used for a custom memset.
+// Otherwise, the memset from string.h will be used.
+#ifndef LAY_MEMSET
+#include <string.h>
+#define LAY_MEMSET(_dst, _val, _size) memset(_dst, _val, _size)
+#endif
 
 #if defined(__GNUC__) || defined(__clang__)
 #define LAY_FORCE_INLINE __attribute__((always_inline)) inline
@@ -37,7 +53,7 @@ void lay_reserve_items_capacity(lay_context *ctx, lay_id count)
     if (count >= ctx->capacity) {
         ctx->capacity = count;
         const size_t item_size = sizeof(lay_item_t) + sizeof(lay_vec4);
-        ctx->items = (lay_item_t*)realloc(ctx->items, ctx->capacity * item_size);
+        ctx->items = (lay_item_t*)LAY_REALLOC(ctx->items, ctx->capacity * item_size);
         const lay_item_t *past_last = ctx->items + ctx->capacity;
         ctx->rects = (lay_vec4*)past_last;
     }
@@ -107,18 +123,18 @@ lay_id lay_item(lay_context *ctx)
     if (idx >= ctx->capacity) {
         ctx->capacity = ctx->capacity < 1 ? 32 : (ctx->capacity * 4);
         const size_t item_size = sizeof(lay_item_t) + sizeof(lay_vec4);
-        ctx->items = (lay_item_t*)realloc(ctx->items, ctx->capacity * item_size);
+        ctx->items = (lay_item_t*)LAY_REALLOC(ctx->items, ctx->capacity * item_size);
         const lay_item_t *past_last = ctx->items + ctx->capacity;
         ctx->rects = (lay_vec4*)past_last;
     }
 
     lay_item_t *item = lay_get_item(ctx, idx);
     // We can either do this here, or when creating/resetting buffer
-    memset(item, 0, sizeof(lay_item_t));
+    LAY_MEMSET(item, 0, sizeof(lay_item_t));
     item->first_child = LAY_INVALID_ID;
     item->next_sibling = LAY_INVALID_ID;
     // hmm
-    memset(&ctx->rects[idx], 0, sizeof(lay_vec4));
+    LAY_MEMSET(&ctx->rects[idx], 0, sizeof(lay_vec4));
     return idx;
 }
 
