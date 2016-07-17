@@ -8,10 +8,11 @@ gcc (mingw64), VS2015, and clang/LLVM. There are only two important files,
 
 ![](https://raw.githubusercontent.com/wiki/randrew/layoutexample/ui_anim_small.gif)
 
-*Layout* has no external dependencies, but does use `stdlib.h` and `string.h`
-for `realloc` and `memset`. If your own project does not or cannot use these,
-you can easily exchange them for something else. Only a few lines will need to
-be edited.
+*Layout* has no external dependencies, but by default it does use `assert.h`,
+`stdlib.h` and `string.h` for `assert`, `realloc` and `memset`. If your own
+project does not or cannot use these, you can easily exchange them for
+something else by using preprocessor definitions. See the section below about
+the available [customizations](#customizations).
 
 *Layout* comes with a small set of tests as a build target, along with a
 primitive benchmark and example usage of the library as a Lua .dll module.
@@ -107,13 +108,31 @@ If you are building *Layout* to use floating point coordinates, and if you want
 to enforce SSE alignment for the vector coordinate types, you'll probably want
 to add or tweak alignment specifiers for some types (or typedef them to m128)
 in [layout.h](layout.h). The code is simple and should be easy to modify for
-your purposes. If you do this, and if you also change the code to use your own
-custom allocator, you might also need to guarantee that the starting addresses
-of the buffers given to *Layout* by your allocator are 16-byte aligned. If you
-do all of that, and if you build *Layout* as a shared library or a static
-library without linker optimizations enabled in MSVC, you might want to also
-consider using `__vectorcall`, which may help reduce overhead when calling
-functions which receive or return SSE values.
+your purposes.
+
+<sub><sup>
+If you do this, you might also need to guarantee that the starting addresses of
+the buffers given to *Layout* by your allocator are 16-byte aligned. This can
+be enforced by defining `LAY_REALLOC` to wrap `realloc` or use a custom
+allocator. If you do all of that, and if you build *Layout* as a shared library
+or a static library without link-time optimizations enabled in MSVC, you might
+want to also consider using `__vectorcall`, which may help reduce overhead when
+calling functions which receive or return SSE values. There may also be no
+useful efficiency gains at all!
+</sup></sub>
+
+Customizations
+--------------
+
+In addition to the `LAY_FLOAT` preprocessor option, other behavior in *Layout*
+can be customized by setting preprocessor definitions. Default behavior will be
+used for undefined customizations.
+
+* `LAY_ASSERT`, if defined, will replace the use of `assert.h`'s `assert`
+
+* `LAY_REALLOC`, if defined, will replace the use of `stdlib.h`'s `realloc`
+
+* `LAY_MEMSET`, if defined, will replace the use of `string.h`'s `memset`
 
 Example
 =======
