@@ -104,11 +104,13 @@ or if you want to specify integer (the default):
 ./genie gmake --coords=integer
 ```
 
+<sub><sup>
 If you are building *Layout* to use floating point coordinates, and if you want
 to enforce SSE alignment for the vector coordinate types, you'll probably want
-to add or tweak alignment specifiers for some types (or typedef them to m128)
-in [layout.h](layout.h). The code is simple and should be easy to modify for
-your purposes.
+to add or tweak alignment specifiers for some types (or typedef them to
+something like m128) in [layout.h](layout.h). The code is simple and should be
+easy to modify for your purposes.
+</sup></sub>
 
 <sub><sup>
 If you do this, you might also need to guarantee that the starting addresses of
