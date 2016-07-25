@@ -90,7 +90,7 @@ typedef struct lay_context {
     lay_id count;
 } lay_context;
 
-// container flags to pass to uiSetBox()
+// Container flags to pass to lay_set_container()
 typedef enum lay_box_flags {
     // flex-direction (bit 0+1)
 
@@ -135,7 +135,7 @@ typedef enum lay_box_flags {
     // FILL is equivalent to stretch; space-between is not supported.
 } lay_box_flags;
 
-// child layout flags to pass to uiSetLayout()
+// child layout flags to pass to lay_set_behave()
 typedef enum lay_layout_flags {
     // attachments (bit 5-8)
     // fully valid when parent uses LAY_LAYOUT model
@@ -161,25 +161,29 @@ typedef enum lay_layout_flags {
     LAY_CENTER = 0x000,
     // anchor to all four directions
     LAY_FILL = 0x1e0,
-    // when wrapping, put this element on a new line
-    // wrapping layout code auto-inserts LAY_BREAK flags,
-    // drawing routines can read them with uiGetLayout()
+    // When in a wrapping container, put this element on a new line. Wrapping
+    // layout code auto-inserts LAY_BREAK flags as needed. See GitHub issues for
+    // TODO related to this.
+    //
+    // Drawing routines can read this via item pointers as needed after
+    // performing layout calculations.
     LAY_BREAK = 0x200
 } lay_layout_flags;
 
 enum {
     // these bits, starting at bit 16, can be safely assigned by the
     // application, e.g. as item types, other event types, drop targets, etc.
-    // they can be set and queried using uiSetFlags() and uiGetFlags()
+    // this is not yet exposed via API functions, you'll need to get/set these
+    // by directly accessing item pointers.
     //
-    // (In reality we have more free bits than this, see what gets used in the
-    // masks)
+    // (In reality we have more free bits than this, TODO)
     //
     // TODO fix int/unsigned size mismatch (clang issues warning for this),
     // should be all bits as 1 instead of INT_MAX
     LAY_USERMASK = 0x7fff0000,
 
-    // a special mask passed to uiFindItem()
+    // a special mask passed to lay_find_item() (currently does not exist, was
+    // not ported from oui)
     LAY_ANY = 0x7fffffff,
 };
 
