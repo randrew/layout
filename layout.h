@@ -262,6 +262,17 @@ LAY_EXPORT void lay_reset_context(lay_context *ctx);
 // on items in a layout without any contents changing.
 LAY_EXPORT void lay_run_context(lay_context *ctx);
 
+// Like lay_run_context(), this procedure will run layout calculations --
+// however, it lets you specify which item you want to start from.
+// lay_run_context() always starts with item 0, the first item, as the root.
+// Running the layout calculations from a specific item is useful if you want
+// need to iteratively re-run parts of your layout hierarchy, or if you are only
+// interested in updating certain subsets of it. Be careful when using this --
+// it's easy to generated bad output if the parent items haven't yet had their
+// output rectangles calculated, or if they've been invalidated (e.g. due to
+// re-allocation).
+LAY_EXPORT void lay_run_item(lay_context *ctx, lay_id item);
+
 // Returns the number of items that have been created in a context.
 LAY_EXPORT lay_id lay_items_count(lay_context *ctx);
 

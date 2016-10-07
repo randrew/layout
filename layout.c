@@ -97,11 +97,18 @@ void lay_run_context(lay_context *ctx)
     }
 
     if (ctx->count > 0) {
-        lay_calc_size(ctx, 0, 0);
-        lay_arrange(ctx, 0, 0);
-        lay_calc_size(ctx, 0, 1);
-        lay_arrange(ctx, 0, 1);
+        lay_run_item(ctx, 0);
     }
+}
+
+void lay_run_item(lay_context *ctx, lay_id item)
+{
+    LAY_ASSERT(ctx != NULL);
+
+    lay_calc_size(ctx, item, 0);
+    lay_arrange(ctx, item, 0);
+    lay_calc_size(ctx, item, 1);
+    lay_arrange(ctx, item, 1);
 }
 
 lay_id lay_items_count(lay_context *ctx)
