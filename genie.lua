@@ -63,7 +63,7 @@ function lay_project(project_name, as_build_type, src_file)
         --files { "**.h", "**.c" }
         files { "**.h", src_file }
 
-        if _ACTION == "vs2015" then
+        if _ACTION == "vs2015" or _ACTION == "vs2017" then
             -- Build as C++ even with .c filename extension, because we
             -- need [] operator for our vector types (GCC provides this in
             -- C with vector_size special attribute, but need operator
@@ -79,7 +79,7 @@ function lay_project(project_name, as_build_type, src_file)
         configuration { "float" }
             defines { "LAY_FLOAT=1" }
 
-        configuration { "vs2015", "windows" }
+        configuration { "vs*", "windows" }
             defines { "_CRT_SECURE_NO_WARNINGS" }
             buildoptions {
                 -- Disable "unreferenced formal parameter" warning
