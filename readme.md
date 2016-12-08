@@ -59,13 +59,15 @@ https://github.com/bkaradzic/bx/raw/master/tools/bin/darwin/genie
 Windows:  
 https://github.com/bkaradzic/bx/raw/master/tools/bin/windows/genie.exe
 
-Visual Studio 2015
+Visual Studio 2015/2017
 ------------------
 
 ```
 genie.exe vs2015
 start build/vs2015/layout.sln
 ```
+
+Replace vs2015 with vs2017 if you want to use Visual Studio 2017.
 
 GCC/MinGW/Clang
 ---------------
