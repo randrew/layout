@@ -37,19 +37,21 @@ typedef int16_t lay_scalar;
 // the vector via indexing operations.
 #if defined(__GNUC__) || defined(__clang__)
 
-// Using floats for coordinates takes up more space than using int16. 128 bits.
-// If you want to use __m128 for SSE, this is where you'd typedef it. If you do
-// that, then make sure you take care of allocating aligned buffers via
-// LAY_REALLOC if your platform's realloc doesn't meet the alignment
-// requirements.
+// Using floats for coordinates takes up more space than using int16. 128 bits
+// for a four-component vector.
 #ifdef LAY_FLOAT
-typedef float lay_vec4 __attribute__ ((__vector_size__ (16), aligned(16)));
-typedef float lay_vec2 __attribute__ ((__vector_size__ (8), aligned(8)));
-// Integer version uses 64 bits.
+typedef float lay_vec4 __attribute__ ((__vector_size__ (16), aligned(4)));
+typedef float lay_vec2 __attribute__ ((__vector_size__ (8), aligned(4)));
+// Integer version uses 64 bits for a four-component vector.
 #else
-typedef int16_t lay_vec4 __attribute__ ((__vector_size__ (8), aligned(8)));
-typedef int16_t lay_vec2 __attribute__ ((__vector_size__ (4), aligned(4)));
+typedef int16_t lay_vec4 __attribute__ ((__vector_size__ (8), aligned(2)));
+typedef int16_t lay_vec2 __attribute__ ((__vector_size__ (4), aligned(2)));
 #endif // LAY_FLOAT
+
+// Note that we're not actually going to make any explicit use of any
+// platform's SIMD instructions -- we're just using the vector extension for
+// more convenient syntax. Therefore, we can specify more relaxed alignment
+// requirements. See the end of this file for some notes about this.
 
 // MSVC doesn't have the vetor_size attribute, but we want convenient indexing
 // operators for our layout logic code. Therefore, we force C++ compilation in
@@ -77,11 +79,7 @@ typedef struct lay_item_t {
     lay_id next_sibling;
     lay_vec4 margins;
     lay_vec2 size;
-#if defined(__GNUC__) || defined(__clang__)
-} __attribute__ ((aligned (16))) lay_item_t;
-#else
 } lay_item_t;
-#endif
 
 typedef struct lay_context {
     lay_item_t *items;
@@ -369,3 +367,19 @@ LAY_STATIC_INLINE lay_vec4 lay_get_rect(const lay_context *ctx, lay_id id)
 
 #undef LAY_EXPORT
 #undef LAY_STATIC_INLINE
+
+// Notes about the use of vector_size merely for syntax convenience:
+//
+// The current layout calculation procedures are not written in a way that
+// would benefit from SIMD instruction usage.
+//
+// (Passing 128-bit float4 vectors using __vectorcall *might* get you some
+// small benefit in very specific situations, but is unlikely to be worth the
+// hassle. And I believe this would only be needed if you compiled the library
+// in a way where the compiler was prevented from using inlining when copying
+// rectangle/size data.)
+//
+// I might go back in the future and just use regular struct-wrapped arrays.
+// I'm not sure if relying the vector thing in GCC/clang and then using C++
+// operator overloading in MSVC is worth the annoyance of saving a couple of
+// extra characters on each array access in the implementation code.

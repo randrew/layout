@@ -106,25 +106,6 @@ or if you want to specify integer (the default):
 ./genie gmake --coords=integer
 ```
 
-<sub><sup>
-If you are building *Layout* to use floating point coordinates, and if you want
-to enforce SSE alignment for the vector coordinate types, you'll probably want
-to add or tweak alignment specifiers for some types (or typedef them to
-something like m128) in [layout.h](layout.h). The code is simple and should be
-easy to modify for your purposes.
-</sup></sub>
-
-<sub><sup>
-If you do this, you might also need to guarantee that the starting addresses of
-the buffers given to *Layout* by your allocator are 16-byte aligned. This can
-be enforced by defining `LAY_REALLOC` to wrap `realloc` or use a custom
-allocator. If you do all of that, and if you build *Layout* as a shared library
-or a static library without link-time optimizations enabled in MSVC, you might
-want to also consider using `__vectorcall`, which may help reduce overhead when
-calling functions which receive or return SSE values. There may also be no
-useful efficiency gains at all!
-</sup></sub>
-
 Customizations
 --------------
 
