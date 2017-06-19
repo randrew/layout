@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LAY_INCLUDE_HEADER
+#define LAY_INCLUDE_HEADER
 
 // Do this:
 //
@@ -421,6 +422,8 @@ LAY_STATIC_INLINE void lay_get_rect_xywh(
 
 #undef LAY_EXPORT
 #undef LAY_STATIC_INLINE
+
+#endif // LAY_INCLUDE_HEADER
 
 // Notes about the use of vector_size merely for syntax convenience:
 //
