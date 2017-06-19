@@ -296,8 +296,12 @@ LAY_EXPORT void lay_run_item(lay_context *ctx, lay_id item);
 //
 // This requirement may be changed in the future.
 //
+// Calling this will also reset any manually-specified breaking. You will need
+// to set the manual breaking again, or simply not call this on any items that
+// you know you wanted to break manually.
+//
 // If you clear your context every time you calculate your layout, or if you
-// don't use wrapping, you don't need to do this.
+// don't use wrapping, you don't need to call this.
 LAY_EXPORT void lay_clear_item_break(lay_context *ctx, lay_id item);
 
 // Returns the number of items that have been created in a context.
