@@ -1,5 +1,6 @@
 #include <stdio.h>
-#include "layout.c"
+#define LAY_IMPLEMENTATION
+#include "layout.h"
 
 #ifdef _WIN32
 #include <windows.h>

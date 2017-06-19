@@ -1,4 +1,5 @@
-#include "layout.c"
+#define LAY_IMPLEMENTATION
+#include "layout.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
