@@ -300,8 +300,11 @@ LAY_EXPORT void lay_append(lay_context *ctx, lay_id earlier, lay_id later);
 // of as the last.
 LAY_EXPORT void lay_push(lay_context *ctx, lay_id parent, lay_id child);
 
-// Gets the size that was set with lay_set_size or lay_set_size_xy.
+// Gets the size that was set with lay_set_size or lay_set_size_xy. The _xy
+// version writes the output values to the specified addresses instead of
+// returning the values in a lay_vec2.
 LAY_EXPORT lay_vec2 lay_get_size(lay_context *ctx, lay_id item);
+LAY_EXPORT void lay_get_size_xy(lay_context *ctx, lay_id item, lay_scalar *x, lay_scalar *y);
 
 // Sets the size of an item. The _xy version passes the width and height as
 // separate arguments, but functions the same.
@@ -318,8 +321,12 @@ LAY_EXPORT void lay_set_contain(lay_context *ctx, lay_id item, uint32_t flags);
 // up all available vertical space inside of its parent.
 LAY_EXPORT void lay_set_behave(lay_context *ctx, lay_id item, uint32_t flags);
 
-// Get the margins that were set by lay_set_margins.
+// Get the margins that were set by lay_set_margins. The _ltrb version writes
+// the output values to the specified addresses instead of returning the values
+// in a lay_vec4.
+// l: left, t: top, r: right, b: bottom
 LAY_EXPORT lay_vec4 lay_get_margins(lay_context *ctx, lay_id item);
+LAY_EXPORT void lay_get_margins_ltrb(lay_context *ctx, lay_id item, lay_scalar *l, lay_scalar *t, lay_scalar *r, lay_scalar *b);
 
 // Set the margins on an item. The components of the vector are:
 // 0: left, 1: top, 2: right, 3: bottom.
@@ -363,6 +370,20 @@ LAY_STATIC_INLINE lay_vec4 lay_get_rect(const lay_context *ctx, lay_id id)
 {
     LAY_ASSERT(id != LAY_INVALID_ID && id < ctx->count);
     return ctx->rects[id];
+}
+
+// The same as lay_get_rect, but writes the x,y positions and width,height
+// values to the specified addresses instead of returning them in a lay_vec4.
+LAY_STATIC_INLINE void lay_get_rect_xywh(
+        const lay_context *ctx, lay_id id,
+        lay_scalar *x, lay_scalar *y, lay_scalar *width, lay_scalar *height)
+{
+    LAY_ASSERT(id != LAY_INVALID_ID && id < ctx->count);
+    lay_vec4 rect = ctx->rects[id];
+    *x = rect[0];
+    *y = rect[1];
+    *width = rect[2];
+    *height = rect[3];
 }
 
 #undef LAY_EXPORT

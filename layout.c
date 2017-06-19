@@ -224,6 +224,15 @@ lay_vec2 lay_get_size(lay_context *ctx, lay_id item)
     return pitem->size;
 }
 
+void lay_get_size_xy(
+        lay_context *ctx, lay_id item,
+        lay_scalar *x, lay_scalar *y)
+{
+    lay_item_t *pitem = lay_get_item(ctx, item);
+    lay_vec2 size = pitem->size;
+    *x = size[0];
+    *y = size[1];
+}
 
 void lay_set_size(lay_context *ctx, lay_id item, lay_vec2 size)
 {
@@ -297,6 +306,18 @@ void lay_set_margins_ltrb(
 
 lay_vec4 lay_get_margins(lay_context *ctx, lay_id item)
 { return lay_get_item(ctx, item)->margins; }
+
+void lay_get_margins_ltrb(
+        lay_context *ctx, lay_id item,
+        lay_scalar *l, lay_scalar *t, lay_scalar *r, lay_scalar *b)
+{
+    lay_item_t *pitem = lay_get_item(ctx, item);
+    lay_vec4 margins = pitem->margins;
+    *l = margins[0];
+    *t = margins[1];
+    *r = margins[2];
+    *b = margins[3];
+}
 
 // TODO restrict item ptrs correctly
 static LAY_FORCE_INLINE

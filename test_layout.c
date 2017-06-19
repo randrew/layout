@@ -116,6 +116,24 @@ LTEST_DECLARE(simple_fill)
 
     LTEST_TRUE(child_r[0] == 0 && child_r[1] == 0);
     LTEST_TRUE(child_r[2] == 30 && child_r[3] == 40);
+
+    // Test to make sure size is ok
+    lay_vec2 root_size = lay_get_size(ctx, root);
+    // Make sure _xy version gives the same values
+    lay_scalar root_size_cs[2];
+    lay_get_size_xy(ctx, root, &root_size_cs[0], &root_size_cs[1]);
+    LTEST_TRUE(root_size[0] == 30 && root_size[1] == 40);
+    LTEST_TRUE(root_size[0] == root_size_cs[0] && root_size[1] == root_size_cs[1]);
+
+    // Test to make sure the _xywh getter produces the same results as the
+    // lay_vec4-return-value version.
+    lay_scalar root_r_cs[4];
+    lay_scalar child_r_cs[4];
+
+    lay_get_rect_xywh(ctx, root, &root_r_cs[0], &root_r_cs[1], &root_r_cs[2], &root_r_cs[3]);
+    lay_get_rect_xywh(ctx, child, &child_r_cs[0], &child_r_cs[1], &child_r_cs[2], &child_r_cs[3]);
+    LTEST_TRUE(root_r[0] == root_r_cs[0] && root_r[1] == root_r_cs[1] && root_r[2] == root_r_cs[2] && root_r[3] == root_r_cs[3]);
+    LTEST_TRUE(child_r[0] == child_r_cs[0] && child_r[1] == child_r_cs[1] && child_r[2] == child_r_cs[2] && child_r[3] == child_r_cs[3]);
 }
 
 LTEST_DECLARE(reserve_capacity)
@@ -280,6 +298,15 @@ LTEST_DECLARE(simple_margins_1)
 
     lay_run_context(ctx);
 
+    // Querying for the margins we set should give us the same value, and the
+    // _ltrb version should also be the same.
+    lay_vec4 child_a_margins = lay_get_margins(ctx, child_a);
+    lay_scalar child_a_margins_cs[4];
+    lay_get_margins_ltrb(ctx, child_a, &child_a_margins_cs[0], &child_a_margins_cs[1], &child_a_margins_cs[2], &child_a_margins_cs[3]);
+    LTEST_TRUE(child_a_margins[0] == 3 && child_a_margins[1] == 5 && child_a_margins[2] == 7 && child_a_margins[3] == 10);
+    LTEST_TRUE(child_a_margins[0] == child_a_margins_cs[0] && child_a_margins[1] == child_a_margins_cs[1] && child_a_margins[2] == child_a_margins_cs[2] && child_a_margins[3] == child_a_margins_cs[3]);
+
+    // The resulting calculated rects should match these values.
     LTEST_VEC4EQ(lay_get_rect(ctx, child_a), 3, 5, 90, (5 + 10));
     LTEST_VEC4EQ(lay_get_rect(ctx, child_b), 0, 30, 100, 30);
     LTEST_VEC4EQ(lay_get_rect(ctx, child_c), 0, 60, 100, 30);
