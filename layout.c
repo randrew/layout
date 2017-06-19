@@ -7,9 +7,13 @@
 // first parameter type is a void pointer, and its value is either a null
 // pointer or an existing pointer. The second parameter is a size_t of the new
 // desired size. The buffer contents should be preserved across reallocations.
+//
+// And, if you define LAY_REALLOC, you will also need to define LAY_FREE, which
+// should have the same behavior as free.
 #ifndef LAY_REALLOC
 #include <stdlib.h>
 #define LAY_REALLOC(_block, _size) realloc(_block, _size)
+#define LAY_FREE(_block) free(_block)
 #endif
 
 // Like the LAY_REALLOC define, LAY_MEMSET can be used for a custom memset.
@@ -62,7 +66,7 @@ void lay_reserve_items_capacity(lay_context *ctx, lay_id count)
 void lay_destroy_context(lay_context *ctx)
 {
     if (ctx->items != NULL) {
-        free(ctx->items);
+        LAY_FREE(ctx->items);
         ctx->items = NULL;
         ctx->rects = NULL;
     }
