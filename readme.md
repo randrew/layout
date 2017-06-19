@@ -147,6 +147,10 @@ Example
 =======
 
 ```C
+// LAY_IMPLEMENTATION needs to be defined in exactly one .c or .cpp file that
+// includes layout.h. All other files should not define it.
+
+#define LAY_IMPLEMENTATION
 #include "layout.h"
 
 // Let's pretend we're creating some kind of GUI with a master list on the
