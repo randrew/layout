@@ -285,6 +285,21 @@ LAY_EXPORT void lay_run_context(lay_context *ctx);
 // re-allocation).
 LAY_EXPORT void lay_run_item(lay_context *ctx, lay_id item);
 
+// Performing a layout on items where wrapping is enabled in the parent
+// container can cause flags to be modified during the calculations. If you plan
+// to call lay_run_context or lay_run_item multiple times without calling
+// lay_reset, and if you have a container that uses wrapping, and if the width
+// or height of the container may have changed, you should call
+// lay_clear_item_break on all of the children of a container before calling
+// lay_run_context or lay_run_item again. If you don't, the layout calculations
+// may perform unnecessary wrapping.
+//
+// This requirement may be changed in the future.
+//
+// If you clear your context every time you calculate your layout, or if you
+// don't use wrapping, you don't need to do this.
+LAY_EXPORT void lay_clear_item_break(lay_context *ctx, lay_id item);
+
 // Returns the number of items that have been created in a context.
 LAY_EXPORT lay_id lay_items_count(lay_context *ctx);
 
@@ -504,24 +519,6 @@ void lay_run_context(lay_context *ctx)
 {
     LAY_ASSERT(ctx != NULL);
 
-    // TODO this is bad. We need to reset the 'break' flag, in case the item
-    // data is being reused across 'run' invocations. Iterating all of the
-    // items up-front like this and mutating data is bad for performance. But
-    // if we don't do this, then the leftover LAY_BREAK bits will still be set
-    // from the previous 'run', which may cause broken wrapping behavior if the
-    // sizes of the container (or the items) have changed.
-    //
-    // Maybe we should instead have a separate 'reset_breaks' procedure the
-    // user can explicitly run when they know they have 'wrap' items which are
-    // being resued across frames.
-    //
-    // Alternatively, we could use a flag bit to indicate whether an item's
-    // children have already been wrapped and may need re-wrapping.
-    for (lay_id i = 0; i < ctx->count; ++i) {
-        lay_item_t *pitem = lay_get_item(ctx, i);
-        pitem->flags = pitem->flags & ~LAY_BREAK;
-    }
-
     if (ctx->count > 0) {
         lay_run_item(ctx, 0);
     }
@@ -535,6 +532,17 @@ void lay_run_item(lay_context *ctx, lay_id item)
     lay_arrange(ctx, item, 0);
     lay_calc_size(ctx, item, 1);
     lay_arrange(ctx, item, 1);
+}
+
+// Alternatively, we could use a flag bit to indicate whether an item's children
+// have already been wrapped and may need re-wrapping. If we do that, in the
+// future, this would become deprecated and we could make it a no-op.
+
+void lay_clear_item_break(lay_context *ctx, lay_id item)
+{
+    LAY_ASSERT(ctx != NULL);
+    lay_item_t *pitem = lay_get_item(ctx, item);
+    pitem->flags = pitem->flags & ~LAY_BREAK;
 }
 
 lay_id lay_items_count(lay_context *ctx)
