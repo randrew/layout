@@ -469,13 +469,21 @@ LAY_STATIC_INLINE void lay_get_rect_xywh(
 
 #if defined(__GNUC__) || defined(__clang__)
 #define LAY_FORCE_INLINE __attribute__((always_inline)) inline
+#ifdef __cplusplus
+#define LAY_RESTRICT __restrict
+#else
 #define LAY_RESTRICT restrict
+#endif // __cplusplus
 #elif defined(_MSC_VER)
 #define LAY_FORCE_INLINE __forceinline
 #define LAY_RESTRICT __restrict
 #else
 #define LAY_FORCE_INLINE inline
+#ifdef __cplusplus
 #define LAY_RESTRICT
+#else
+#define LAY_RESTRICT restrict
+#endif // __cplusplus
 #endif
 
 // Useful math utilities
