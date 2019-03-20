@@ -387,6 +387,8 @@ LAY_STATIC_INLINE lay_id lay_first_child(const lay_context *ctx, lay_id id)
     return pitem->first_child;
 }
 
+LAY_EXPORT lay_id lay_last_child(const lay_context *ctx, lay_id parent);
+
 // Get the id of the next sibling of an item, if any. Returns LAY_INVALID_ID if
 // there is no next sibling.
 LAY_STATIC_INLINE lay_id lay_next_sibling(const lay_context *ctx, lay_id id)
