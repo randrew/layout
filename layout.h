@@ -471,7 +471,7 @@ LAY_STATIC_INLINE void lay_get_rect_xywh(
 #endif
 
 #if defined(__GNUC__) || defined(__clang__)
-#define LAY_FORCE_INLINE __attribute__((always_inline)) inline
+#define LAY_FORCE_INLINE inline
 #ifdef __cplusplus
 #define LAY_RESTRICT __restrict
 #else
