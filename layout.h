@@ -227,7 +227,8 @@ enum {
 LAY_STATIC_INLINE lay_vec4 lay_vec4_xyzw(lay_scalar x, lay_scalar y, lay_scalar z, lay_scalar w)
 {
 #if defined(__GNUC__) || defined(__clang__)
-    return (lay_vec4){x, y, z, w};
+    lay_vec4 result{x, y, z, w};
+    return result;
 #elif defined(_MSC_VER)
     lay_vec4 result;
     result[0] = x;
@@ -387,6 +388,8 @@ LAY_STATIC_INLINE lay_id lay_first_child(const lay_context *ctx, lay_id id)
     return pitem->first_child;
 }
 
+LAY_EXPORT lay_id lay_last_child(const lay_context *ctx, lay_id parent);
+
 // Get the id of the next sibling of an item, if any. Returns LAY_INVALID_ID if
 // there is no next sibling.
 LAY_STATIC_INLINE lay_id lay_next_sibling(const lay_context *ctx, lay_id id)
@@ -468,7 +471,7 @@ LAY_STATIC_INLINE void lay_get_rect_xywh(
 #endif
 
 #if defined(__GNUC__) || defined(__clang__)
-#define LAY_FORCE_INLINE __attribute__((always_inline)) inline
+#define LAY_FORCE_INLINE inline
 #ifdef __cplusplus
 #define LAY_RESTRICT __restrict
 #else
