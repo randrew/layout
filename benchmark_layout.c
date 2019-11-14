@@ -67,7 +67,7 @@ int sprint_item_info(char* str, lay_context *ctx, lay_id item)
     else {}
 
 #define LTEST_DECLARE(testname) \
-    static void test_##testname(lay_context *ctx, char* strbuf)
+    static void test_##testname(lay_context *ctx)
 
 // vec4 equals test
 #define LTEST_VEC4EQ(vecvar, x, y, z, w) \
@@ -75,7 +75,7 @@ int sprint_item_info(char* str, lay_context *ctx, lay_id item)
 #define LTEST_VEC4UNEQ(vecvar, x, y, z, w) \
     LTEST_FALSE(vecvar[0] == x && vecvar[1] == y && vecvar[2] == z && vecvar[3] == w)
 
-static inline void benchmark_nested(lay_context *ctx, char *strbuf)
+static inline void benchmark_nested(lay_context *ctx)
 {
     const size_t num_rows = 5;
     // one of the rows is "fake" and will have 0 units tall height
@@ -235,10 +235,8 @@ static inline void benchmark_nested(lay_context *ctx, char *strbuf)
 //
 // Resets string buffer and lay context before running test
 #define LBENCH_RUN(testname) \
-    memset(sbuf, 0, 4096); \
     lay_reset_context(&ctx); \
-    printf(" * " #testname "\n"); \
-    testname(&ctx, sbuf);
+    printf(" * " #testname "\n");
 
 int main()
 {
@@ -248,12 +246,8 @@ int main()
 #endif
     stm_setup();
 
-    char *sbuf = (char*)malloc(4096);
-
     lay_context ctx;
     lay_init_context(&ctx);
-
-    memset(sbuf, 0, 4096);
 
     printf("Running benchmarks\n");
 
@@ -265,7 +259,7 @@ int main()
         lay_reset_context(&ctx);
         uint64_t t1 = stm_now();
         //printf(" * " #testname "\n");
-        benchmark_nested(&ctx, sbuf);
+        benchmark_nested(&ctx);
         uint64_t diff = stm_since(t1);
         total_perfc += diff;
         run_times[run_n] = diff;
@@ -279,6 +273,5 @@ int main()
     free(run_times);
 
     lay_destroy_context(&ctx);
-    free(sbuf);
     return 0;
 }
