@@ -226,9 +226,9 @@ enum {
 
 LAY_STATIC_INLINE lay_vec4 lay_vec4_xyzw(lay_scalar x, lay_scalar y, lay_scalar z, lay_scalar w)
 {
-#if defined(__GNUC__) || defined(__clang__)
+#if (defined(__GNUC__) || defined(__clang__)) && !defined(__cplusplus)
     return (lay_vec4){x, y, z, w};
-#elif defined(_MSC_VER)
+#else
     lay_vec4 result;
     result[0] = x;
     result[1] = y;
