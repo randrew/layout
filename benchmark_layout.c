@@ -56,12 +56,14 @@ int sprint_item_info(char* str, lay_context *ctx, lay_id item)
 #define LTEST_TRUE(cond) \
     if (cond) {} \
     else { \
-        printf("Failed test at line %d in %s", __LINE__, __func__); \
+        printf("Failed test at line %d in %s\n", __LINE__, __func__); \
+        fflush(stdout); \
         abort(); \
     }
 #define LTEST_FALSE(cond) \
     if (cond) { \
-        printf("Failed test at line %d in %s", __LINE__, __func__); \
+        printf("Failed test at line %d in %s\n", __LINE__, __func__); \
+        fflush(stdout); \
         abort(); \
     } \
     else {}
