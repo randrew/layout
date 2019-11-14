@@ -1,6 +1,10 @@
 #include <stdio.h>
+#define SOKOL_IMPL
+#include "sokol_time.h"
+#undef SOKOL_IMPL
 #define LAY_IMPLEMENTATION
 #include "layout.h"
+#undef LAY_IMPLEMENTATION
 
 #ifdef _WIN32
 #include <windows.h>
@@ -11,25 +15,6 @@ LONG WINAPI LayTestUnhandledExceptionFilter(EXCEPTION_POINTERS* ExceptionInfo)
     fflush(stdout);
     // TODO Do useful stuff
     return EXCEPTION_EXECUTE_HANDLER;
-}
-
-static inline double get_perf_freq()
-{
-    LARGE_INTEGER freq;
-    QueryPerformanceFrequency(&freq);
-    return (double)freq.QuadPart;
-}
-
-static inline int64_t perf_counter()
-{
-    LARGE_INTEGER c;
-    QueryPerformanceCounter(&c);
-    return (int64_t)c.QuadPart;
-}
-
-static inline double perf_seconds(double perf_freq, int64_t t)
-{
-    return t / perf_freq;
 }
 
 #endif
@@ -261,36 +246,35 @@ int main()
     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
     SetUnhandledExceptionFilter(LayTestUnhandledExceptionFilter);
 #endif
+    stm_setup();
 
     char *sbuf = (char*)malloc(4096);
 
     lay_context ctx;
     lay_init_context(&ctx);
 
-    double freq = get_perf_freq();
     memset(sbuf, 0, 4096);
 
     printf("Running benchmarks\n");
 
     //LBENCH_RUN(benchmark_nested);
-    int64_t total_perfc = 0;
+    uint64_t total_perfc = 0;
     const uint32_t num_runs = 100000;
-    int64_t *run_times = (int64_t*)calloc(num_runs, sizeof(int64_t));
+    uint64_t *run_times = (uint64_t*)calloc(num_runs, sizeof(uint64_t));
     for (uint32_t run_n = 0; run_n < num_runs; ++run_n) {
         lay_reset_context(&ctx);
-        int64_t t1 = perf_counter();
+        uint64_t t1 = stm_now();
         //printf(" * " #testname "\n");
         benchmark_nested(&ctx, sbuf);
-        int64_t t2 = perf_counter();
-        int64_t diff = t2 - t1;
+        uint64_t diff = stm_since(t1);
         total_perfc += diff;
         run_times[run_n] = diff;
         //double seconds = perf_seconds(freq, diff);
         //printf("Run %d: %f microsecs\n", run_n + 1, seconds * 1000000.0);
     }
 
-    double avg_seconds = perf_seconds(freq, total_perfc) / (double)num_runs;
-    printf("Average time: %f", avg_seconds * 1000000.0);
+    double avg = stm_us(total_perfc) / (double)num_runs;
+    printf("Average time: %f usecs", avg);
 
     free(run_times);
 
