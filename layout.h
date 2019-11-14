@@ -135,7 +135,7 @@ typedef enum lay_box_flags {
     // at end of row/column
     LAY_END = 0x010,
     // insert spacing to stretch across whole row/column
-    LAY_JUSTIFY = 0x018,
+    LAY_JUSTIFY = 0x018
 
     // align-items
     // can be implemented by putting a flex container in a layout container,
@@ -197,7 +197,7 @@ enum {
 
     // a special mask passed to lay_find_item() (currently does not exist, was
     // not ported from oui)
-    LAY_ANY = 0x7fffffff,
+    LAY_ANY = 0x7fffffff
 };
 
 enum {
@@ -221,7 +221,7 @@ enum {
     // which flag bits will be compared
     LAY_ITEM_COMPARE_MASK = LAY_ITEM_BOX_MODEL_MASK
         | (LAY_ITEM_LAYOUT_MASK & ~LAY_BREAK)
-        | LAY_USERMASK,
+        | LAY_USERMASK
 };
 
 LAY_STATIC_INLINE lay_vec4 lay_vec4_xyzw(lay_scalar x, lay_scalar y, lay_scalar z, lay_scalar w)
