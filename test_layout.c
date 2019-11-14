@@ -375,7 +375,7 @@ LTEST_DECLARE(nested_boxes_1)
         lay_id col = lay_item(ctx);
         lay_id inner_sizer = lay_item(ctx);
         // only the second one will have height
-        lay_set_size_xy(ctx, inner_sizer, 25, (lay_scalar)10 * i);
+        lay_set_size_xy(ctx, inner_sizer, 25, (lay_scalar)(10 * i));
         // align to bottom, only should make a difference for
         // first item
         lay_set_behave(ctx, col, LAY_BOTTOM);
