@@ -63,7 +63,7 @@ int sprint_item_info(char* str, lay_context *ctx, lay_id item)
     else {}
 
 #define LTEST_DECLARE(testname) \
-    static void test_##testname(lay_context *ctx, char *strbuf)
+    static void test_##testname(lay_context *ctx)
 
 // vec4 equals test
 #define LTEST_VEC4EQ(vecvar, x, y, z, w) \
@@ -888,10 +888,9 @@ LTEST_DECLARE(wrap_column_4)
 //
 // Resets string buffer and lay context before running test
 #define LTEST_RUN(testname) \
-    memset(sbuf, 0, 4096); \
     lay_reset_context(&ctx); \
     printf(" * " #testname "\n"); \
-    test_##testname(&ctx, sbuf);
+    test_##testname(&ctx);
 
 int main()
 {
@@ -899,8 +898,6 @@ int main()
     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
     SetUnhandledExceptionFilter(LayTestUnhandledExceptionFilter);
 #endif
-
-    char *sbuf = (char*)malloc(4096);
 
     lay_context ctx;
     lay_init_context(&ctx);
@@ -933,6 +930,5 @@ int main()
     printf("Finished tests\n");
 
     lay_destroy_context(&ctx);
-    free(sbuf);
     return 0;
 }
