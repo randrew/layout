@@ -894,8 +894,10 @@ LTEST_DECLARE(wrap_column_4)
     printf(" * " #testname "\n"); \
     test_##testname(&ctx);
 
-int main()
+int main(int argc, char** argv)
 {
+    (void)argc;
+    (void)argv;
 #ifdef _WIN32
     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
     SetUnhandledExceptionFilter(LayTestUnhandledExceptionFilter);

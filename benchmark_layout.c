@@ -238,8 +238,10 @@ static inline void benchmark_nested(lay_context *ctx)
     lay_reset_context(&ctx); \
     printf(" * " #testname "\n");
 
-int main()
+int main(int argc, char** argv)
 {
+    (void)argc;
+    (void)argv;
 #ifdef _WIN32
     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
     SetUnhandledExceptionFilter(LayTestUnhandledExceptionFilter);
