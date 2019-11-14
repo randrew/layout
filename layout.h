@@ -557,7 +557,7 @@ void lay_clear_item_break(lay_context *ctx, lay_id item)
 {
     LAY_ASSERT(ctx != NULL);
     lay_item_t *pitem = lay_get_item(ctx, item);
-    pitem->flags = pitem->flags & ~LAY_BREAK;
+    pitem->flags = pitem->flags & ~(uint32_t)LAY_BREAK;
 }
 
 lay_id lay_items_count(lay_context *ctx)
@@ -689,11 +689,11 @@ void lay_set_size(lay_context *ctx, lay_id item, lay_vec2 size)
     pitem->size = size;
     uint32_t flags = pitem->flags;
     if (size[0] == 0)
-        flags &= ~LAY_ITEM_HFIXED;
+        flags &= ~(uint32_t)LAY_ITEM_HFIXED;
     else
         flags |= LAY_ITEM_HFIXED;
     if (size[1] == 0)
-        flags &= ~LAY_ITEM_VFIXED;
+        flags &= ~(uint32_t)LAY_ITEM_VFIXED;
     else
         flags |= LAY_ITEM_VFIXED;
     pitem->flags = flags;
@@ -709,11 +709,11 @@ void lay_set_size_xy(
     // Kinda redundant, whatever
     uint32_t flags = pitem->flags;
     if (width == 0)
-        flags &= ~LAY_ITEM_HFIXED;
+        flags &= ~(uint32_t)LAY_ITEM_HFIXED;
     else
         flags |= LAY_ITEM_HFIXED;
     if (height == 0)
-        flags &= ~LAY_ITEM_VFIXED;
+        flags &= ~(uint32_t)LAY_ITEM_VFIXED;
     else
         flags |= LAY_ITEM_VFIXED;
     pitem->flags = flags;
@@ -723,14 +723,14 @@ void lay_set_behave(lay_context *ctx, lay_id item, uint32_t flags)
 {
     LAY_ASSERT((flags & LAY_ITEM_LAYOUT_MASK) == flags);
     lay_item_t *pitem = lay_get_item(ctx, item);
-    pitem->flags = (pitem->flags & ~LAY_ITEM_LAYOUT_MASK) | flags;
+    pitem->flags = (pitem->flags & ~(uint32_t)LAY_ITEM_LAYOUT_MASK) | flags;
 }
 
 void lay_set_contain(lay_context *ctx, lay_id item, uint32_t flags)
 {
     LAY_ASSERT((flags & LAY_ITEM_BOX_MASK) == flags);
     lay_item_t *pitem = lay_get_item(ctx, item);
-    pitem->flags = (pitem->flags & ~LAY_ITEM_BOX_MASK) | flags;
+    pitem->flags = (pitem->flags & ~(uint32_t)LAY_ITEM_BOX_MASK) | flags;
 }
 void lay_set_margins(lay_context *ctx, lay_id item, lay_vec4 ltrb)
 {
