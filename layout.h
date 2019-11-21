@@ -1069,7 +1069,7 @@ void lay_arrange_overlay(lay_context *ctx, lay_id item, int dim)
             child_rect[dim] += (space - child_rect[2 + dim]) / 2 - child_margins[wdim];
             break;
         case LAY_RIGHT:
-            child_rect[dim] += space - child_rect[2 + dim] - child_margins[wdim];
+            child_rect[dim] += space - child_rect[2 + dim] - child_margins[dim] - child_margins[wdim];
             break;
         case LAY_HFILL:
             child_rect[2 + dim] = lay_scalar_max(0, space - child_rect[dim] - child_margins[wdim]);

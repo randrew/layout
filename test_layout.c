@@ -886,6 +886,40 @@ LTEST_DECLARE(wrap_column_4)
     free(items);
 }
 
+LTEST_DECLARE(anchor_right_margin1)
+{
+    lay_id root = lay_item(ctx);
+    lay_set_size_xy(ctx, root, 100, 100);
+
+    lay_id child = lay_item(ctx);
+    lay_set_size_xy(ctx, child, 50, 50);
+    lay_set_margins_ltrb(ctx, child, 5, 5, 0, 0);
+    lay_set_behave(ctx, child, LAY_BOTTOM | LAY_RIGHT);
+
+    lay_insert(ctx, root, child);
+
+    lay_run_context(ctx);
+
+    LTEST_VEC4EQ(lay_get_rect(ctx, child), 50, 50, 50, 50);
+}
+
+LTEST_DECLARE(anchor_right_margin2)
+{
+    lay_id root = lay_item(ctx);
+    lay_set_size_xy(ctx, root, 100, 100);
+
+    lay_id child = lay_item(ctx);
+    lay_set_size_xy(ctx, child, 50, 50);
+    lay_set_margins_ltrb(ctx, child, 5, 5, 10, 10);
+    lay_set_behave(ctx, child, LAY_BOTTOM | LAY_RIGHT);
+
+    lay_insert(ctx, root, child);
+
+    lay_run_context(ctx);
+
+    LTEST_VEC4EQ(lay_get_rect(ctx, child), 40, 40, 50, 50);
+}
+
 // Call in main to run a test by name
 //
 // Resets string buffer and lay context before running test
@@ -930,6 +964,8 @@ int main(int argc, char** argv)
     LTEST_RUN(wrap_column_2);
     LTEST_RUN(wrap_column_3);
     LTEST_RUN(wrap_column_4);
+    LTEST_RUN(anchor_right_margin1);
+    LTEST_RUN(anchor_right_margin2);
 
     printf("Finished tests\n");
 
