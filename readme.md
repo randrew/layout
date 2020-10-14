@@ -36,19 +36,6 @@ project does not or cannot use these, you can easily exchange them for
 something else by using preprocessor definitions. See the section below about
 the available [customizations](#customizations).
 
-*Layout* comes with a small set of tests as a build target, along with a
-primitive benchmark and example usage of the library as a Lua .dll module.
-However, you don't need any of this to use *Layout* in your own project.
-
-Building the tests, benchmarks and Lua module are handled by
-[GENie](https://github.com/bkaradzic/GENie), but no executable binaries for
-GENie are included in this source repository. [Download links for binary builds
-of GENie are listed below](#download-genie). You will need to download (or
-build yourself) a GENie executable and place it in your path or at the root of
-this repository tree. If you want to build on a platform other than Windows,
-you'll likely need to modify [genie.lua](genie.lua) for compatibility. Feel
-free to open issues or pull requests.
-
 *Layout* can be built as C99 or C++ if you are using GCC or Clang, but must be
 built as C++ if you are using MSVC. This requirement exists because the
 *Layout* implementation code uses the `vector_size` extension in GCC and Clang,
@@ -62,51 +49,12 @@ implementation easier to read.
 [duangle](https://twitter.com/duangle). Unlike *oui*, *Layout* does not handle
 anything related to user input, focus, or UI state.
 
-Building the Tests and Benchmarks
-=================================
-
-If you want to build *Layout*'s tests, benchmarks, or example Lua module, you
-will first need to get (or make) a GENie binary and place it in your path or at
-the root of this repository.
-
-Download GENie
---------------
-
-Linux:  
-https://github.com/bkaradzic/bx/raw/master/tools/bin/linux/genie
-
-OSX:  
-https://github.com/bkaradzic/bx/raw/master/tools/bin/darwin/genie
-
-Windows:  
-https://github.com/bkaradzic/bx/raw/master/tools/bin/windows/genie.exe
-
-Visual Studio 2015/2017
-------------------
-
-```
-genie.exe vs2015
-start build/vs2015/layout.sln
-```
-
-Replace vs2015 with vs2017 if you want to use Visual Studio 2017.
-
-GCC/MinGW/Clang
----------------
-
-```
-./genie gmake
-```
-
-and then run your `make` in the directory `build/gmake`. You will need to
-specify a target and config. Here is an example for building the `tests` target
-in Windows with the 64-bit release configuration using mingw64 in a bash-like
-shell (for example, git bash):
-
-
-```
-./genie.exe gmake && mingw32-make.exe -C build/gmake tests config=release64
-```
+Building the tests and benchmarks is handled by the [tool.bash](tool.bash)
+script, or by [GENie](https://github.com/bkaradzic/GENie). See the section
+below about [building the tests and
+benchmarks](#building-the-tests-and-benchmarks). There's also an example of
+using *Layout* as a Lua `.dll` module. However, you don't need any of that to
+use *Layout* in your own project.
 
 Options
 -------
@@ -115,31 +63,20 @@ You can choose to build *Layout* to use either integer (int16) or floating
 point (float) coordinates. Integer is the default, because UI and other 2D
 layouts do not often use units smaller than a single point when aligning and
 positioning elements. You can choose to use floating point instead of integer
-by defining `LAY_FLOAT`. If you are building the tests, benchmarks, or Lua
-module for *Layout*, you can configure this when you invoke GENie:
+by defining `LAY_FLOAT`.
 
-```
-./genie gmake --coords=float
-```
-
-or if you want to specify integer (the default):
-
-```
-./genie gmake --coords=integer
-```
-
-Customizations
---------------
+* `LAY_FLOAT`, when defined, will use `float` instead of `int16` for
+  coordinates.
 
 In addition to the `LAY_FLOAT` preprocessor option, other behavior in *Layout*
 can be customized by setting preprocessor definitions. Default behavior will be
 used for undefined customizations.
 
-* `LAY_ASSERT`, if defined, will replace the use of `assert.h`'s `assert`
+* `LAY_ASSERT` will replace the use of `assert.h`'s `assert`
 
-* `LAY_REALLOC`, if defined, will replace the use of `stdlib.h`'s `realloc`
+* `LAY_REALLOC` will replace the use of `stdlib.h`'s `realloc`
 
-* `LAY_MEMSET`, if defined, will replace the use of `string.h`'s `memset`
+* `LAY_MEMSET` will replace the use of `string.h`'s `memset`
 
 If you define `LAY_REALLOC`, you will also need to define `LAY_FREE`.
 
@@ -255,3 +192,81 @@ lay_destroy_context(&ctx);
 // The heap-allocated buffer is now freed. The context is now invalid for use
 // until lay_init_context is called on it again.
 ```
+
+Building the Tests and Benchmarks
+=================================
+
+ⓘ | None of this is necessary to use in your own project. These directions are only for building the tests and benchmarks programs, which you probably don't care about.
+:---: | :---
+
+If you have bash and are on a POSIX system, you can use the `tool.bash`
+script to build *Layout*'s standalone tests and benchmarks programs. Run
+`tool.bash` to see the options.
+
+<h3>Using GENie</h3>
+
+Instead of using the `tool.bash` script, you can use GENie to generate a Visual
+Studio project file, or any of the other project and build system output types
+it supports. The GENie generator also lets you build the example Lua module.
+
+<details>
+<summary>Directions for acquiring and using GENie</summary>
+
+The [genie.lua](genie.lua) script is mostly tested on Windows, so if you use it
+on another platform, you might need to tweak it.
+
+You will first need to get (or make) a GENie binary and place it in your path
+or at the root of this repository.
+
+Download GENie
+--------------
+
+Linux:  
+https://github.com/bkaradzic/bx/raw/master/tools/bin/linux/genie
+
+OSX:  
+https://github.com/bkaradzic/bx/raw/master/tools/bin/darwin/genie
+
+Windows:  
+https://github.com/bkaradzic/bx/raw/master/tools/bin/windows/genie.exe
+
+Visual Studio 2015/2017
+-----------------------
+
+```
+genie.exe vs2015
+start build/vs2015/layout.sln
+```
+
+Replace vs2015 with vs2017 if you want to use Visual Studio 2017.
+
+GCC/MinGW/Clang
+---------------
+
+```
+./genie gmake
+```
+
+and then run your `make` in the directory `build/gmake`. You will need to
+specify a target and config. Here is an example for building the `tests` target
+in Windows with the 64-bit release configuration using mingw64 in a bash-like
+shell (for example, git bash):
+
+
+```
+./genie.exe gmake && mingw32-make.exe -C build/gmake tests config=release64
+```
+
+If you want to use float coordinates instead of integer, you can use an option in the build script which will define `LAY_FLOAT` for you:
+
+```
+./genie gmake --coords=float
+```
+
+or if you want to specify integer (the default):
+
+```
+./genie gmake --coords=integer
+```
+
+</details>

@@ -3,7 +3,7 @@ set -eu -o pipefail
 
 print_usage() {
 cat <<EOF
-Usage: tool [options] command [args]
+Usage: tool.bash [options] command [args]
 Commands:
     build <config> <target>
         Configs: debug, release
