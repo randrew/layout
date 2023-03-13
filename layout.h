@@ -94,6 +94,9 @@ typedef struct lay_item_t {
     lay_id next_sibling;
     lay_vec4 margins;
     lay_vec2 size;
+#ifdef LAY_USE_NAMES
+    const char *name;
+#endif // LAY_USE_NAMES
 } lay_item_t;
 
 typedef struct lay_context {
@@ -333,6 +336,11 @@ LAY_EXPORT void lay_append(lay_context *ctx, lay_id earlier, lay_id later);
 // Like lay_insert, but puts the new item as the first child in a parent instead
 // of as the last.
 LAY_EXPORT void lay_push(lay_context *ctx, lay_id parent, lay_id child);
+
+#ifdef LAY_USE_NAMES
+LAY_EXPORT const char *lay_get_name(lay_context *ctx, lay_id item);
+LAY_EXPORT void lay_set_name(lay_context *ctx, lay_id item, const char *name);
+#endif // LAY_USE_NAMES
 
 // Gets the size that was set with lay_set_size or lay_set_size_xy. The _xy
 // version writes the output values to the specified addresses instead of
@@ -666,6 +674,20 @@ void lay_push(lay_context *ctx, lay_id parent, lay_id new_child)
     pchild->flags |= LAY_ITEM_INSERTED;
     pchild->next_sibling = old_child;
 }
+
+#ifdef LAY_USE_NAMES
+const char *lay_get_name(lay_context *ctx, lay_id item)
+{
+    lay_item_t *pitem = lay_get_item(ctx, item);
+    return pitem->name;
+}
+
+void lay_set_name(lay_context *ctx, lay_id item, const char *name)
+{
+    lay_item_t *pitem = lay_get_item(ctx, item);
+    pitem->name = name;
+}
+#endif // LAY_USE_NAMES
 
 lay_vec2 lay_get_size(lay_context *ctx, lay_id item)
 {
